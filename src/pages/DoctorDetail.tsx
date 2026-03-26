@@ -258,46 +258,30 @@ export default function DoctorDetail({
             Back to listings
           </button>
 
-          <div className="bg-gradient-to-r from-teal-50 via-blue-50 to-teal-50 rounded-2xl p-8 shadow-lg">
+          <div className="bg-white rounded-lg p-8 shadow-sm">
             <div className="flex flex-col md:flex-row gap-8">
-              <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-teal-400 to-blue-400 rounded-xl opacity-75 group-hover:opacity-100 blur transition duration-300"></div>
-                <img
-                  src={doctor.profile_image || 'https://via.placeholder.com/200'}
-                  alt={doctor.name}
-                  className="relative w-48 h-48 rounded-xl object-cover border-4 border-white shadow-xl"
-                />
-              </div>
+              <img
+                src={doctor.profile_image || 'https://via.placeholder.com/200'}
+                alt={doctor.name}
+                className="w-48 h-48 rounded-lg object-cover border-4 border-teal-100 shadow-sm"
+              />
 
               <div className="flex-1">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h1 className="text-4xl font-bold text-gray-900 mb-2">
-                      {doctor.name}
-                    </h1>
-                    <p className="text-lg text-gray-700 font-medium">{doctor.title}</p>
-                    {doctor.designation && (
-                      <div className="inline-block mt-2">
-                        <span className="px-4 py-2 bg-gradient-to-r from-teal-600 to-teal-500 text-white rounded-lg text-sm font-semibold shadow-md">
-                          {doctor.designation}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="text-right print:hidden">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
-                      <span className="text-2xl font-bold text-gray-900">{doctor.rating || '4.8'}</span>
-                    </div>
-                    <p className="text-sm text-gray-600">{doctor.total_reviews || '128'} reviews</p>
-                  </div>
-                </div>
+                <h1 className="text-3xl font-bold text-gray-800">
+                  {doctor.name}
+                </h1>
+                <p className="text-lg text-gray-600 mt-2">{doctor.title}</p>
+                {doctor.designation && (
+                  <p className="text-md text-teal-600 font-semibold mt-1">
+                    {doctor.designation}
+                  </p>
+                )}
 
                 <div className="flex flex-wrap gap-2 mt-4">
                   {specializations.map((spec, index) => (
                     <span
                       key={index}
-                      className="px-4 py-2 bg-white text-teal-700 rounded-full text-sm font-semibold hover:bg-teal-100 cursor-pointer transition-all duration-200 border-2 border-teal-200 shadow-sm hover:shadow-md print:cursor-default"
+                      className="px-4 py-2 bg-teal-100 text-teal-700 rounded-full text-sm font-medium hover:bg-teal-200 cursor-pointer transition-colors print:cursor-default"
                       onClick={() => onNavigate('category', undefined, { type: 'specialization', value: spec })}
                     >
                       {spec}
@@ -306,27 +290,23 @@ export default function DoctorDetail({
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                  <div className="bg-white rounded-lg p-4 shadow-sm border border-teal-100">
-                    <div className="flex items-center text-gray-700">
-                      <Clock className="h-5 w-5 mr-3 text-teal-600" />
-                      <div>
-                        <p className="text-xs text-gray-500 font-medium">Experience</p>
-                        <p className="font-bold text-gray-900 text-lg">
-                          {doctor.years_of_experience} years
-                        </p>
-                      </div>
+                  <div className="flex items-center text-gray-700">
+                    <Clock className="h-5 w-5 mr-2 text-teal-600" />
+                    <div>
+                      <p className="text-xs text-gray-500">Experience</p>
+                      <p className="font-semibold">
+                        {doctor.years_of_experience} years
+                      </p>
                     </div>
                   </div>
 
-                  <div className="bg-white rounded-lg p-4 shadow-sm border border-teal-100">
-                    <div className="flex items-center text-gray-700">
-                      <CreditCard className="h-5 w-5 mr-3 text-teal-600" />
-                      <div>
-                        <p className="text-xs text-gray-500 font-medium">BMDC No</p>
-                        <p className="font-bold text-gray-900 text-lg">
-                          {doctor.bmdc_number || 'N/A'}
-                        </p>
-                      </div>
+                  <div className="flex items-center text-gray-700">
+                    <CreditCard className="h-5 w-5 mr-2 text-teal-600" />
+                    <div>
+                      <p className="text-xs text-gray-500">BMDC No</p>
+                      <p className="font-semibold">
+                        {doctor.bmdc_number || 'N/A'}
+                      </p>
                     </div>
                   </div>
 
@@ -340,13 +320,11 @@ export default function DoctorDetail({
                     );
 
                     return mainInstitution ? (
-                      <div className="bg-white rounded-lg p-4 shadow-sm border border-teal-100">
-                        <div className="flex items-center text-gray-700">
-                          <MapPin className="h-5 w-5 mr-3 text-teal-600" />
-                          <div>
-                            <p className="text-xs text-gray-500 font-medium">Working in</p>
-                            <p className="font-bold text-gray-900 text-sm">{mainInstitution.institution}</p>
-                          </div>
+                      <div className="flex items-center text-gray-700">
+                        <MapPin className="h-5 w-5 mr-2 text-teal-600" />
+                        <div>
+                          <p className="text-xs text-gray-500">Working in</p>
+                          <p className="font-semibold text-gray-800">{mainInstitution.institution}</p>
                         </div>
                       </div>
                     ) : null;
