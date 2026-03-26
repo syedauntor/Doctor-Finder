@@ -617,21 +617,6 @@ export default function DoctorDetail({
                   {shareSuccess ? 'Link Copied!' : 'Share Link'}
                 </button>
 
-                <button
-                  onClick={() => setShowQRCode(!showQRCode)}
-                  className="w-full flex items-center justify-center px-6 py-3 bg-white border-2 border-teal-600 text-teal-600 rounded-lg hover:bg-teal-50 transition-colors font-medium"
-                >
-                  <QrCode className="h-5 w-5 mr-2" />
-                  {showQRCode ? 'Hide QR Code' : 'Show QR Code'}
-                </button>
-
-                <button
-                  onClick={handlePrint}
-                  className="w-full flex items-center justify-center px-6 py-3 bg-white border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-medium print:hidden"
-                >
-                  <Printer className="h-5 w-5 mr-2" />
-                  Print Profile
-                </button>
               </div>
 
               {showQRCode && (
