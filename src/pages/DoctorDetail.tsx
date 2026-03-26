@@ -258,13 +258,18 @@ export default function DoctorDetail({
             Back to listings
           </button>
 
-          <div className="bg-white rounded-lg p-8 shadow-sm">
-            <div className="flex flex-col md:flex-row gap-8">
-              <img
-                src={doctor.profile_image || 'https://via.placeholder.com/200'}
-                alt={doctor.name}
-                className="w-48 h-48 rounded-lg object-cover border-4 border-teal-100 shadow-sm"
-              />
+          <div className="relative bg-gradient-to-br from-teal-50 via-white to-blue-50 rounded-2xl p-8 shadow-sm overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-teal-100 rounded-full filter blur-3xl opacity-20 -mr-32 -mt-32"></div>
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-100 rounded-full filter blur-3xl opacity-20 -ml-32 -mb-32"></div>
+
+            <div className="relative flex flex-col md:flex-row gap-8">
+              <div className="relative">
+                <img
+                  src={doctor.profile_image || 'https://via.placeholder.com/200'}
+                  alt={doctor.name}
+                  className="w-48 h-48 rounded-2xl object-cover border-4 border-white shadow-lg"
+                />
+              </div>
 
               <div className="flex-1">
                 <h1 className="text-3xl font-bold text-gray-800">
