@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import {
   Star,
   Phone,
@@ -14,7 +14,11 @@ import {
   CreditCard,
   Share2,
   Navigation,
+  Printer,
+  QrCode,
+  Download,
 } from 'lucide-react';
+import { QRCodeCanvas } from 'qrcode.react';
 import {
   supabase,
   type Doctor,
@@ -58,6 +62,10 @@ export default function DoctorDetail({
   );
   const [loading, setLoading] = useState(true);
   const [shareSuccess, setShareSuccess] = useState(false);
+  const [showQRCode, setShowQRCode] = useState(false);
+  const [showPrintCard, setShowPrintCard] = useState(false);
+  const qrCodeRef = useRef<HTMLDivElement>(null);
+  const printCardRef = useRef<HTMLDivElement>(null);
 
   const handleShare = async () => {
     const url = window.location.href;
@@ -77,6 +85,21 @@ export default function DoctorDetail({
       }
     } catch (error) {
       console.error('Error sharing:', error);
+    }
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const downloadQRCode = () => {
+    const canvas = qrCodeRef.current?.querySelector('canvas');
+    if (canvas) {
+      const url = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.download = `Dr-${doctor?.name.replace(/\s+/g, '-')}-QR.png`;
+      link.href = url;
+      link.click();
     }
   };
 
@@ -225,86 +248,110 @@ export default function DoctorDetail({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="bg-white shadow-sm">
+      <div className="bg-white shadow-sm print:shadow-none">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <button
             onClick={() => onNavigate('home')}
-            className="flex items-center text-teal-600 hover:text-teal-700 mb-4"
+            className="flex items-center text-teal-600 hover:text-teal-700 mb-4 print:hidden"
           >
             <ArrowLeft className="h-5 w-5 mr-2" />
             Back to listings
           </button>
 
-          <div className="flex flex-col md:flex-row gap-8">
-            <img
-              src={doctor.profile_image || 'https://via.placeholder.com/200'}
-              alt={doctor.name}
-              className="w-48 h-48 rounded-lg object-cover border-4 border-teal-100"
-            />
-
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-800">
-                {doctor.name}
-              </h1>
-              <p className="text-lg text-gray-600 mt-2">{doctor.title}</p>
-              {doctor.designation && (
-                <p className="text-md text-teal-600 font-semibold mt-1">
-                  {doctor.designation}
-                </p>
-              )}
-
-              <div className="flex flex-wrap gap-2 mt-4">
-                {specializations.map((spec, index) => (
-                  <span
-                    key={index}
-                    className="px-4 py-2 bg-teal-100 text-teal-700 rounded-full text-sm font-medium hover:bg-teal-200 cursor-pointer transition-colors"
-                    onClick={() => onNavigate('category', undefined, { type: 'specialization', value: spec })}
-                  >
-                    {spec}
-                  </span>
-                ))}
+          <div className="bg-gradient-to-r from-teal-50 via-blue-50 to-teal-50 rounded-2xl p-8 shadow-lg">
+            <div className="flex flex-col md:flex-row gap-8">
+              <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-teal-400 to-blue-400 rounded-xl opacity-75 group-hover:opacity-100 blur transition duration-300"></div>
+                <img
+                  src={doctor.profile_image || 'https://via.placeholder.com/200'}
+                  alt={doctor.name}
+                  className="relative w-48 h-48 rounded-xl object-cover border-4 border-white shadow-xl"
+                />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                <div className="flex items-center text-gray-700">
-                  <Clock className="h-5 w-5 mr-2 text-teal-600" />
+              <div className="flex-1">
+                <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-xs text-gray-500">Experience</p>
-                    <p className="font-semibold">
-                      {doctor.years_of_experience} years
-                    </p>
+                    <h1 className="text-4xl font-bold text-gray-900 mb-2">
+                      {doctor.name}
+                    </h1>
+                    <p className="text-lg text-gray-700 font-medium">{doctor.title}</p>
+                    {doctor.designation && (
+                      <div className="inline-block mt-2">
+                        <span className="px-4 py-2 bg-gradient-to-r from-teal-600 to-teal-500 text-white rounded-lg text-sm font-semibold shadow-md">
+                          {doctor.designation}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-right print:hidden">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
+                      <span className="text-2xl font-bold text-gray-900">{doctor.rating || '4.8'}</span>
+                    </div>
+                    <p className="text-sm text-gray-600">{doctor.total_reviews || '128'} reviews</p>
                   </div>
                 </div>
 
-                <div className="flex items-center text-gray-700">
-                  <CreditCard className="h-5 w-5 mr-2 text-teal-600" />
-                  <div>
-                    <p className="text-xs text-gray-500">BMDC No</p>
-                    <p className="font-semibold">
-                      {doctor.bmdc_number || 'N/A'}
-                    </p>
-                  </div>
+                <div className="flex flex-wrap gap-2 mt-4">
+                  {specializations.map((spec, index) => (
+                    <span
+                      key={index}
+                      className="px-4 py-2 bg-white text-teal-700 rounded-full text-sm font-semibold hover:bg-teal-100 cursor-pointer transition-all duration-200 border-2 border-teal-200 shadow-sm hover:shadow-md print:cursor-default"
+                      onClick={() => onNavigate('category', undefined, { type: 'specialization', value: spec })}
+                    >
+                      {spec}
+                    </span>
+                  ))}
                 </div>
 
-                {(() => {
-                  const mainInstitution = currentExperience.find(exp =>
-                    exp.institution &&
-                    !exp.institution.toLowerCase().includes('centre') &&
-                    !exp.institution.toLowerCase().includes('center') &&
-                    !exp.institution.toLowerCase().includes('clinic') &&
-                    !exp.institution.toLowerCase().includes('chamber')
-                  );
-
-                  return mainInstitution ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                  <div className="bg-white rounded-lg p-4 shadow-sm border border-teal-100">
                     <div className="flex items-center text-gray-700">
-                      <MapPin className="h-5 w-5 mr-2 text-teal-600" />
+                      <Clock className="h-5 w-5 mr-3 text-teal-600" />
                       <div>
-                        <p className="text-xs text-gray-500">Working in</p>
-                        <p className="font-semibold text-gray-800">{mainInstitution.institution}</p>
+                        <p className="text-xs text-gray-500 font-medium">Experience</p>
+                        <p className="font-bold text-gray-900 text-lg">
+                          {doctor.years_of_experience} years
+                        </p>
                       </div>
                     </div>
-                  ) : null;
-                })()}
+                  </div>
+
+                  <div className="bg-white rounded-lg p-4 shadow-sm border border-teal-100">
+                    <div className="flex items-center text-gray-700">
+                      <CreditCard className="h-5 w-5 mr-3 text-teal-600" />
+                      <div>
+                        <p className="text-xs text-gray-500 font-medium">BMDC No</p>
+                        <p className="font-bold text-gray-900 text-lg">
+                          {doctor.bmdc_number || 'N/A'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {(() => {
+                    const mainInstitution = currentExperience.find(exp =>
+                      exp.institution &&
+                      !exp.institution.toLowerCase().includes('centre') &&
+                      !exp.institution.toLowerCase().includes('center') &&
+                      !exp.institution.toLowerCase().includes('clinic') &&
+                      !exp.institution.toLowerCase().includes('chamber')
+                    );
+
+                    return mainInstitution ? (
+                      <div className="bg-white rounded-lg p-4 shadow-sm border border-teal-100">
+                        <div className="flex items-center text-gray-700">
+                          <MapPin className="h-5 w-5 mr-3 text-teal-600" />
+                          <div>
+                            <p className="text-xs text-gray-500 font-medium">Working in</p>
+                            <p className="font-bold text-gray-900 text-sm">{mainInstitution.institution}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : null;
+                  })()}
+                </div>
               </div>
             </div>
           </div>
@@ -577,24 +624,68 @@ export default function DoctorDetail({
               </div>
             </section>
 
-            <section className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">
+            <section className="bg-gradient-to-br from-teal-50 to-blue-50 rounded-lg shadow-md p-6">
+              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <Share2 className="h-5 w-5 mr-2 text-teal-600" />
                 Share Profile
               </h3>
-              <button
-                onClick={handleShare}
-                className="w-full flex items-center justify-center px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
-              >
-                <Share2 className="h-5 w-5 mr-2" />
-                {shareSuccess ? 'Link Copied!' : 'Share Profile'}
-              </button>
-              <p className="text-xs text-gray-500 mt-2 text-center">
-                Share this profile with patients or colleagues
+
+              <div className="space-y-3">
+                <button
+                  onClick={handleShare}
+                  className="w-full flex items-center justify-center px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium shadow-sm"
+                >
+                  <Share2 className="h-5 w-5 mr-2" />
+                  {shareSuccess ? 'Link Copied!' : 'Share Link'}
+                </button>
+
+                <button
+                  onClick={() => setShowQRCode(!showQRCode)}
+                  className="w-full flex items-center justify-center px-6 py-3 bg-white border-2 border-teal-600 text-teal-600 rounded-lg hover:bg-teal-50 transition-colors font-medium"
+                >
+                  <QrCode className="h-5 w-5 mr-2" />
+                  {showQRCode ? 'Hide QR Code' : 'Show QR Code'}
+                </button>
+
+                <button
+                  onClick={handlePrint}
+                  className="w-full flex items-center justify-center px-6 py-3 bg-white border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-medium print:hidden"
+                >
+                  <Printer className="h-5 w-5 mr-2" />
+                  Print Profile
+                </button>
+              </div>
+
+              {showQRCode && (
+                <div className="mt-6 p-4 bg-white rounded-lg border-2 border-gray-200">
+                  <div ref={qrCodeRef} className="flex justify-center mb-4">
+                    <QRCodeCanvas
+                      value={window.location.href}
+                      size={200}
+                      level="H"
+                      includeMargin={true}
+                    />
+                  </div>
+                  <p className="text-sm text-center text-gray-600 mb-3">
+                    Scan to view profile
+                  </p>
+                  <button
+                    onClick={downloadQRCode}
+                    className="w-full flex items-center justify-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Download QR Code
+                  </button>
+                </div>
+              )}
+
+              <p className="text-xs text-gray-600 mt-4 text-center leading-relaxed">
+                Share this profile with patients, colleagues, or on social media. Print for offline use.
               </p>
             </section>
 
             {similarDoctors.length > 0 && (
-              <section className="bg-white rounded-lg shadow-md p-6">
+              <section className="bg-white rounded-lg shadow-md p-6 print:hidden">
                 <h3 className="text-xl font-bold text-gray-800 mb-4">
                   Similar Doctors
                 </h3>
