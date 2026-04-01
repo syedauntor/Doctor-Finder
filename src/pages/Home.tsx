@@ -162,12 +162,12 @@ export default function Home({ onNavigate }: HomeProps) {
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
             {[
-              { name: 'Gynecologist & Obstetrician', icon: Baby, color: 'from-blue-400 to-blue-500' },
-              { name: 'Medicine Specialist', icon: Stethoscope, color: 'from-blue-400 to-blue-500' },
-              { name: 'Cardiologist', icon: Heart, color: 'from-blue-400 to-blue-500' },
-              { name: 'Pediatrician', icon: Users, color: 'from-blue-400 to-blue-500' },
-              { name: 'General Surgeon', icon: Activity, color: 'from-blue-400 to-blue-500' },
-              { name: 'Otolaryngologists (ENT)', icon: Brain, color: 'from-blue-400 to-blue-500' },
+              { name: 'Gynecologist & Obstetrician', icon: Baby, color: 'from-teal-400 to-teal-500' },
+              { name: 'Medicine Specialist', icon: Stethoscope, color: 'from-teal-400 to-teal-500' },
+              { name: 'Cardiologist', icon: Heart, color: 'from-teal-400 to-teal-500' },
+              { name: 'Pediatrician', icon: Users, color: 'from-teal-400 to-teal-500' },
+              { name: 'General Surgeon', icon: Activity, color: 'from-teal-400 to-teal-500' },
+              { name: 'Otolaryngologists (ENT)', icon: Brain, color: 'from-teal-400 to-teal-500' },
             ].map((category, index) => {
               const Icon = category.icon;
               return (
@@ -177,14 +177,11 @@ export default function Home({ onNavigate }: HomeProps) {
                   className="group flex flex-col items-center text-center transition-transform hover:scale-105"
                 >
                   <div className={`w-24 h-24 rounded-full bg-gradient-to-br ${category.color} bg-opacity-10 flex items-center justify-center mb-4 shadow-lg group-hover:shadow-xl transition-shadow`}>
-                    <Icon className="w-12 h-12 text-blue-500" strokeWidth={1.5} />
+                    <Icon className="w-12 h-12 text-teal-600" strokeWidth={1.5} />
                   </div>
-                  <h3 className="text-sm font-semibold text-gray-900 mb-2">
+                  <h3 className="text-sm font-semibold text-gray-900">
                     {category.name}
                   </h3>
-                  <button className="text-blue-600 text-sm font-medium hover:text-blue-700 transition-colors">
-                    Consult Now
-                  </button>
                 </button>
               );
             })}
