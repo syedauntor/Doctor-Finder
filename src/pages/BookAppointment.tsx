@@ -6,8 +6,7 @@ import Footer from '../components/Footer';
 interface Doctor {
   id: string;
   name: string;
-  specialty: string;
-  qualifications: string;
+  title: string;
   consultation_fee_follow_up: number;
 }
 
@@ -45,7 +44,7 @@ export default function BookAppointment({ doctorId }: BookAppointmentProps) {
     try {
       const { data, error } = await supabase
         .from('doctors')
-        .select('id, name, specialty, qualifications, consultation_fee_follow_up')
+        .select('id, name, title, consultation_fee_follow_up')
         .eq('id', doctorId)
         .maybeSingle();
 
@@ -183,8 +182,7 @@ export default function BookAppointment({ doctorId }: BookAppointmentProps) {
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Book Appointment</h1>
               <div className="bg-teal-50 p-4 rounded-lg">
                 <p className="text-lg font-semibold text-teal-900">{doctor.name}</p>
-                <p className="text-teal-700">{doctor.specialty}</p>
-                <p className="text-sm text-teal-600 mt-1">{doctor.qualifications}</p>
+                <p className="text-sm text-teal-600 mt-1">{doctor.title}</p>
                 <p className="text-lg font-bold text-teal-900 mt-2">
                   Consultation Fee: ৳{doctor.consultation_fee_follow_up}
                 </p>
