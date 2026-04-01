@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AuthProvider } from './contexts/AuthContext';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
@@ -16,6 +16,22 @@ function App() {
   const [currentPage, setCurrentPage] = useState('home');
   const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<{ type: string; value: string } | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const page = params.get('page');
+
+    if (page) {
+      setCurrentPage(page);
+
+      if (page === 'book-appointment') {
+        const doctor = params.get('doctor');
+        if (doctor) {
+          setSelectedDoctorId(doctor);
+        }
+      }
+    }
+  }, []);
 
   const handleNavigate = (page: string, doctorId?: string, filter?: { type: string; value: string }) => {
     setCurrentPage(page);
