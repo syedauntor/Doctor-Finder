@@ -145,13 +145,12 @@ export default function Home({ onNavigate }: HomeProps) {
           <div className="flex items-center justify-between mb-12">
             <div>
               <h2 className="text-3xl font-bold text-gray-900">
-                Consult our top specialized doctors
+                Find By Specialty
               </h2>
-              <p className="text-gray-600 mt-2">Our doctors are ready to serve you 24/7</p>
             </div>
             <button
               onClick={() => onNavigate('category', undefined, { type: 'all' })}
-              className="text-blue-600 hover:text-blue-700 font-medium flex items-center transition-colors"
+              className="text-teal-600 hover:text-teal-700 font-medium flex items-center transition-colors"
             >
               View all
               <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -162,12 +161,12 @@ export default function Home({ onNavigate }: HomeProps) {
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
             {[
-              { name: 'Gynecologist & Obstetrician', icon: Baby, color: 'from-teal-400 to-teal-500' },
-              { name: 'Medicine Specialist', icon: Stethoscope, color: 'from-teal-400 to-teal-500' },
-              { name: 'Cardiologist', icon: Heart, color: 'from-teal-400 to-teal-500' },
-              { name: 'Pediatrician', icon: Users, color: 'from-teal-400 to-teal-500' },
-              { name: 'General Surgeon', icon: Activity, color: 'from-teal-400 to-teal-500' },
-              { name: 'Otolaryngologists (ENT)', icon: Brain, color: 'from-teal-400 to-teal-500' },
+              { name: 'Gynecologist & Obstetrician', icon: Baby },
+              { name: 'Medicine Specialist', icon: Stethoscope },
+              { name: 'Cardiologist', icon: Heart },
+              { name: 'Pediatrician', icon: Users },
+              { name: 'General Surgeon', icon: Activity },
+              { name: 'Otolaryngologists (ENT)', icon: Brain },
             ].map((category, index) => {
               const Icon = category.icon;
               return (
@@ -176,8 +175,8 @@ export default function Home({ onNavigate }: HomeProps) {
                   onClick={() => onNavigate('category', undefined, { type: 'specialization', value: category.name })}
                   className="group flex flex-col items-center text-center transition-transform hover:scale-105"
                 >
-                  <div className={`w-24 h-24 rounded-full bg-gradient-to-br ${category.color} bg-opacity-10 flex items-center justify-center mb-4 shadow-lg group-hover:shadow-xl transition-shadow`}>
-                    <Icon className="w-12 h-12 text-teal-600" strokeWidth={1.5} />
+                  <div className="w-24 h-24 rounded-full bg-teal-500 flex items-center justify-center mb-4 shadow-lg group-hover:shadow-xl transition-all group-hover:bg-teal-600">
+                    <Icon className="w-12 h-12 text-white" strokeWidth={1.5} />
                   </div>
                   <h3 className="text-sm font-semibold text-gray-900">
                     {category.name}
