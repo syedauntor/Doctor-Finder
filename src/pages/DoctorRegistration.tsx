@@ -45,8 +45,11 @@ export default function DoctorRegistration() {
       <div className="bg-gradient-to-r from-teal-700 to-teal-600 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-4xl font-bold mb-4">Doctor Registration</h1>
-          <p className="text-xl text-teal-100">
+          <p className="text-xl text-teal-100 mb-2">
             Join our platform and connect with patients across Bangladesh
+          </p>
+          <p className="text-lg text-teal-200 italic">
+            "আপনার সেবা, আমাদের প্ল্যাটফর্ম - একসাথে স্বাস্থ্যসেবায় নতুন মাত্রা"
           </p>
         </div>
       </div>
