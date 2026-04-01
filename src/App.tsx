@@ -69,7 +69,7 @@ function App() {
 
         {currentPage === 'dashboard' && <DoctorDashboard />}
 
-        {currentPage === 'book-appointment' && <BookAppointment />}
+        {currentPage === 'book-appointment' && <BookAppointment doctorId={selectedDoctorId} />}
 
         {currentPage === 'availability' && <AvailabilityManagement />}
       </div>

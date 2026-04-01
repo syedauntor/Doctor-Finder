@@ -11,9 +11,11 @@ interface Doctor {
   consultation_fee_follow_up: number;
 }
 
-export default function BookAppointment() {
-  const searchParams = new URLSearchParams(window.location.search);
-  const doctorId = searchParams.get('doctor');
+interface BookAppointmentProps {
+  doctorId: string | null;
+}
+
+export default function BookAppointment({ doctorId }: BookAppointmentProps) {
 
   const [doctor, setDoctor] = useState<Doctor | null>(null);
   const [loading, setLoading] = useState(true);
