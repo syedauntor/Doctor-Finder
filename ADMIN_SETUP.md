@@ -2,7 +2,16 @@
 
 This guide explains how to set up the admin system for the Doctor Directory platform.
 
-## Creating the First Admin User
+## Demo Admin Account (Already Created)
+
+A demo admin account has been created for you:
+
+**Email:** admin@demo.com
+**Password:** demo123456
+
+You can use this account to login and test the admin dashboard immediately!
+
+## Creating Additional Admin Users
 
 To create an admin user, you need to:
 
