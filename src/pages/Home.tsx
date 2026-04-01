@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Search, Filter } from 'lucide-react';
+import { Search, Filter, Baby, Heart, Stethoscope, Activity, Bone, Eye, Brain, Users } from 'lucide-react';
 import { supabase, type Doctor, type Specialization } from '../lib/supabase';
 import DoctorCard from '../components/DoctorCard';
 import Footer from '../components/Footer';
@@ -139,6 +139,59 @@ export default function Home({ onNavigate }: HomeProps) {
           </div>
         )}
       </div>
+
+      <div className="bg-gradient-to-br from-blue-50 via-white to-teal-50 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-12">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900">
+                Consult our top specialized doctors
+              </h2>
+              <p className="text-gray-600 mt-2">Our doctors are ready to serve you 24/7</p>
+            </div>
+            <button
+              onClick={() => onNavigate('category', undefined, { type: 'all' })}
+              className="text-blue-600 hover:text-blue-700 font-medium flex items-center transition-colors"
+            >
+              View all
+              <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
+            {[
+              { name: 'Gynecologist & Obstetrician', icon: Baby, color: 'from-blue-400 to-blue-500' },
+              { name: 'Medicine Specialist', icon: Stethoscope, color: 'from-blue-400 to-blue-500' },
+              { name: 'Cardiologist', icon: Heart, color: 'from-blue-400 to-blue-500' },
+              { name: 'Pediatrician', icon: Users, color: 'from-blue-400 to-blue-500' },
+              { name: 'General Surgeon', icon: Activity, color: 'from-blue-400 to-blue-500' },
+              { name: 'Otolaryngologists (ENT)', icon: Brain, color: 'from-blue-400 to-blue-500' },
+            ].map((category, index) => {
+              const Icon = category.icon;
+              return (
+                <button
+                  key={index}
+                  onClick={() => onNavigate('category', undefined, { type: 'specialization', value: category.name })}
+                  className="group flex flex-col items-center text-center transition-transform hover:scale-105"
+                >
+                  <div className={`w-24 h-24 rounded-full bg-gradient-to-br ${category.color} bg-opacity-10 flex items-center justify-center mb-4 shadow-lg group-hover:shadow-xl transition-shadow`}>
+                    <Icon className="w-12 h-12 text-blue-500" strokeWidth={1.5} />
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-900 mb-2">
+                    {category.name}
+                  </h3>
+                  <button className="text-blue-600 text-sm font-medium hover:text-blue-700 transition-colors">
+                    Consult Now
+                  </button>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
       <Footer />
     </div>
   );
