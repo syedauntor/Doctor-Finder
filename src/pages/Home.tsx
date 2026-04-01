@@ -149,7 +149,7 @@ export default function Home({ onNavigate }: HomeProps) {
         )}
       </div>
 
-      <div className="bg-gradient-to-r from-blue-900 to-blue-800 py-12">
+      <div className="bg-gradient-to-r from-teal-700 to-teal-600 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
           <div className="flex flex-col md:flex-row items-center gap-8 max-w-4xl">
             <div className="flex-shrink-0">
@@ -164,12 +164,12 @@ export default function Home({ onNavigate }: HomeProps) {
               <h2 className="text-2xl md:text-3xl font-bold mb-4">
                 Emergency Service Hotline Numbers
               </h2>
-              <p className="text-lg text-blue-100 mb-6">
+              <p className="text-lg text-teal-100 mb-6">
                 Call 16263, and an ambulance will arrive at your doorstep
               </p>
               <a
                 href="tel:16263"
-                className="inline-flex items-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="inline-flex items-center space-x-2 bg-teal-500 hover:bg-teal-400 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 <Phone className="h-5 w-5" />
                 <span>Call Now</span>
