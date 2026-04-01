@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { CheckCircle, XCircle, Clock, Users, UserCheck, FileText, Eye, LogOut, Home } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, Users, UserCheck, FileText, Eye, LogOut, Home, Calendar } from 'lucide-react';
 import Footer from '../components/Footer';
 
 interface RegistrationRequest {
@@ -32,10 +32,29 @@ interface AdminDashboardProps {
   onNavigate: (page: string) => void;
 }
 
+interface Appointment {
+  id: string;
+  appointment_date: string;
+  appointment_time: string;
+  status: string;
+  consultation_type: string;
+  notes: string;
+  doctors: {
+    name: string;
+    email: string;
+  };
+  patients: {
+    name: string;
+    email: string;
+    phone: string;
+  };
+}
+
 export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
-  const [activeTab, setActiveTab] = useState<'requests' | 'doctors'>('requests');
+  const [activeTab, setActiveTab] = useState<'requests' | 'doctors' | 'appointments'>('requests');
   const [requests, setRequests] = useState<RegistrationRequest[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<RegistrationRequest | Doctor | null>(null);
   const [verificationNotes, setVerificationNotes] = useState('');
@@ -86,7 +105,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
 
         if (error) throw error;
         setRequests(data || []);
-      } else {
+      } else if (activeTab === 'doctors') {
         const { data, error } = await supabase
           .from('doctors')
           .select('*')
@@ -94,6 +113,19 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
 
         if (error) throw error;
         setDoctors(data || []);
+      } else if (activeTab === 'appointments') {
+        const { data, error } = await supabase
+          .from('appointments')
+          .select(`
+            *,
+            doctors (name, email),
+            patients (name, email, phone)
+          `)
+          .order('appointment_date', { ascending: false })
+          .order('appointment_time', { ascending: false });
+
+        if (error) throw error;
+        setAppointments(data || []);
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -251,7 +283,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="bg-blue-50 p-6 rounded-lg">
               <div className="flex items-center justify-between">
                 <div>
@@ -285,6 +317,16 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                 <Users className="h-12 w-12 text-gray-400" />
               </div>
             </div>
+
+            <div className="bg-teal-50 p-6 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-teal-600 font-medium">Total Appointments</p>
+                  <p className="text-3xl font-bold text-teal-900 mt-2">{appointments.length}</p>
+                </div>
+                <Calendar className="h-12 w-12 text-teal-400" />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -313,11 +355,22 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                 <Users className="inline-block h-5 w-5 mr-2" />
                 All Doctors
               </button>
+              <button
+                onClick={() => setActiveTab('appointments')}
+                className={`flex-1 px-6 py-4 text-center font-medium transition-colors ${
+                  activeTab === 'appointments'
+                    ? 'bg-teal-600 text-white'
+                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <Calendar className="inline-block h-5 w-5 mr-2" />
+                Appointments
+              </button>
             </div>
           </div>
 
           <div className="p-6">
-            {activeTab === 'requests' ? (
+            {activeTab === 'requests' && (
               <div className="space-y-4">
                 {requests.length === 0 ? (
                   <p className="text-center text-gray-500 py-8">No registration requests found.</p>
@@ -378,7 +431,9 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                   ))
                 )}
               </div>
-            ) : (
+            )}
+
+            {activeTab === 'doctors' && (
               <div className="space-y-4">
                 {doctors.length === 0 ? (
                   <p className="text-center text-gray-500 py-8">No doctors found.</p>
@@ -423,6 +478,70 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                             <Eye className="h-4 w-4 mr-1" />
                             Manage
                           </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+
+            {activeTab === 'appointments' && (
+              <div className="space-y-4">
+                {appointments.length === 0 ? (
+                  <p className="text-center text-gray-500 py-8">No appointments found.</p>
+                ) : (
+                  appointments.map((appointment) => (
+                    <div
+                      key={appointment.id}
+                      className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              {appointment.patients.name}
+                            </h3>
+                            <span
+                              className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                appointment.status === 'pending'
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : appointment.status === 'confirmed'
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : appointment.status === 'completed'
+                                  ? 'bg-green-100 text-green-800'
+                                  : 'bg-red-100 text-red-800'
+                              }`}
+                            >
+                              {appointment.status.toUpperCase()}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-3">
+                            <span className="font-medium">Doctor:</span> {appointment.doctors.name}
+                          </p>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                            <p className="text-gray-600">
+                              <span className="font-medium">Date:</span>{' '}
+                              {new Date(appointment.appointment_date).toLocaleDateString()}
+                            </p>
+                            <p className="text-gray-600">
+                              <span className="font-medium">Time:</span>{' '}
+                              {appointment.appointment_time.slice(0, 5)}
+                            </p>
+                            <p className="text-gray-600">
+                              <span className="font-medium">Patient Phone:</span> {appointment.patients.phone}
+                            </p>
+                            <p className="text-gray-600">
+                              <span className="font-medium">Type:</span>{' '}
+                              {appointment.consultation_type === 'in-person' ? 'In-Person' : 'Online'}
+                            </p>
+                          </div>
+                          {appointment.notes && (
+                            <div className="mt-3 bg-gray-50 p-3 rounded-lg">
+                              <p className="text-sm font-medium text-gray-700">Patient Notes:</p>
+                              <p className="text-sm text-gray-600 mt-1">{appointment.notes}</p>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
