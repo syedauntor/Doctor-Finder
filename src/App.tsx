@@ -77,7 +77,7 @@ function App() {
 
         {currentPage === 'admin-login' && <AdminLogin onNavigate={handleNavigate} />}
 
-        {currentPage === 'admin-dashboard' && <AdminDashboard />}
+        {currentPage === 'admin-dashboard' && <AdminDashboard onNavigate={handleNavigate} />}
       </div>
     </AuthProvider>
   );

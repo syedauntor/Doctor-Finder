@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { CheckCircle, XCircle, Clock, Users, UserCheck, FileText, Eye } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, Users, UserCheck, FileText, Eye, LogOut, Home } from 'lucide-react';
 import Footer from '../components/Footer';
 
 interface RegistrationRequest {
@@ -28,7 +28,11 @@ interface Doctor {
   created_at: string;
 }
 
-export default function AdminDashboard() {
+interface AdminDashboardProps {
+  onNavigate: (page: string) => void;
+}
+
+export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const [activeTab, setActiveTab] = useState<'requests' | 'doctors'>('requests');
   const [requests, setRequests] = useState<RegistrationRequest[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -184,6 +188,15 @@ export default function AdminDashboard() {
     }
   }
 
+  async function handleLogout() {
+    try {
+      await supabase.auth.signOut();
+      onNavigate('home');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -211,8 +224,28 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-gray-50">
       <div className="bg-gradient-to-r from-teal-700 to-teal-600 text-white py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-          <p className="text-teal-100 mt-2">Manage doctor registrations and verifications</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+              <p className="text-teal-100 mt-2">Manage doctor registrations and verifications</p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => onNavigate('home')}
+                className="bg-white/10 hover:bg-white/20 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2"
+              >
+                <Home className="h-5 w-5" />
+                Home
+              </button>
+              <button
+                onClick={handleLogout}
+                className="bg-white/10 hover:bg-white/20 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2"
+              >
+                <LogOut className="h-5 w-5" />
+                Logout
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -475,7 +508,7 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      <Footer />
+      <Footer onNavigate={onNavigate} />
     </div>
   );
 }
