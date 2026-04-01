@@ -614,6 +614,14 @@ export default function DoctorDetail({
               </h3>
 
               <div className="space-y-3">
+                <a
+                  href={`/?page=book-appointment&doctor=${doctorId}`}
+                  className="w-full flex items-center justify-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm"
+                >
+                  <Calendar className="h-5 w-5 mr-2" />
+                  Book Appointment
+                </a>
+
                 <button
                   onClick={handleShare}
                   className="w-full flex items-center justify-center px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium shadow-sm"

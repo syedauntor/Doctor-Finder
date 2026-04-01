@@ -47,19 +47,27 @@ export default function DoctorCard({
           </div>
         </div>
 
-        <div className="mt-4 pt-4 border-t border-gray-200 flex items-center justify-between">
-          <div>
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <div className="mb-3">
             <p className="text-xs text-gray-500">Consultation Fee</p>
             <p className="text-lg font-bold text-teal-600">
               ৳{doctor.consultation_fee}
             </p>
           </div>
-          <button
-            onClick={() => onViewProfile(doctor.id)}
-            className="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium"
-          >
-            View Profile
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => onViewProfile(doctor.id)}
+              className="flex-1 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium"
+            >
+              View Profile
+            </button>
+            <a
+              href={`/?page=book-appointment&doctor=${doctor.id}`}
+              className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-center"
+            >
+              Book Now
+            </a>
+          </div>
         </div>
       </div>
     </div>

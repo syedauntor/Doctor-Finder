@@ -13,6 +13,7 @@ export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
     { name: 'Home', path: 'home' },
     { name: 'About', path: 'about' },
     { name: 'Contact', path: 'contact' },
+    { name: 'Doctor Login', path: 'doctor-login' },
   ];
 
   return (
