@@ -700,7 +700,7 @@ export default function DoctorDetail({
           </div>
         </div>
       </div>
-      <Footer />
+      <Footer onNavigate={onNavigate} />
     </div>
   );
 }

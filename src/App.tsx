@@ -5,6 +5,7 @@ import DoctorDetail from './pages/DoctorDetail';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Category from './pages/Category';
+import DoctorRegistration from './pages/DoctorRegistration';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -39,6 +40,8 @@ function App() {
       {currentPage === 'about' && <About />}
 
       {currentPage === 'contact' && <Contact />}
+
+      {currentPage === 'doctor-registration' && <DoctorRegistration />}
     </div>
   );
 }

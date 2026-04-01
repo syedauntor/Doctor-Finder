@@ -316,7 +316,7 @@ export default function Home({ onNavigate }: HomeProps) {
         </div>
       </div>
 
-      <Footer />
+      <Footer onNavigate={onNavigate} />
     </div>
   );
 }

@@ -1,6 +1,10 @@
 import { Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Instagram } from 'lucide-react';
 
-export default function Footer() {
+interface FooterProps {
+  onNavigate?: (page: string) => void;
+}
+
+export default function Footer({ onNavigate }: FooterProps) {
   const currentYear = new Date().getFullYear();
 
   return (
@@ -18,24 +22,36 @@ export default function Footer() {
             <h3 className="text-white text-lg font-bold mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-sm hover:text-teal-400 transition-colors">
+                <button
+                  onClick={() => onNavigate?.('home')}
+                  className="text-sm hover:text-teal-400 transition-colors text-left"
+                >
                   Find Doctors
-                </a>
+                </button>
               </li>
               <li>
-                <a href="#" className="text-sm hover:text-teal-400 transition-colors">
-                  Specializations
-                </a>
+                <button
+                  onClick={() => onNavigate?.('doctor-registration')}
+                  className="text-sm hover:text-teal-400 transition-colors text-left"
+                >
+                  Doctor Registration
+                </button>
               </li>
               <li>
-                <a href="#" className="text-sm hover:text-teal-400 transition-colors">
+                <button
+                  onClick={() => onNavigate?.('about')}
+                  className="text-sm hover:text-teal-400 transition-colors text-left"
+                >
                   About Us
-                </a>
+                </button>
               </li>
               <li>
-                <a href="#" className="text-sm hover:text-teal-400 transition-colors">
+                <button
+                  onClick={() => onNavigate?.('contact')}
+                  className="text-sm hover:text-teal-400 transition-colors text-left"
+                >
                   Contact
-                </a>
+                </button>
               </li>
             </ul>
           </div>

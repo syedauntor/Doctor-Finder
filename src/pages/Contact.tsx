@@ -175,7 +175,7 @@ export default function Contact() {
           </form>
         </div>
       </div>
-      <Footer />
+      <Footer onNavigate={() => {}} />
     </div>
   );
 }

@@ -371,7 +371,7 @@ export default function Category({ filter, onNavigate }: CategoryProps) {
         )}
       </main>
 
-      <Footer />
+      <Footer onNavigate={onNavigate} />
     </div>
   );
 }
