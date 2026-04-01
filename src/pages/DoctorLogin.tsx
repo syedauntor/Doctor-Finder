@@ -3,7 +3,11 @@ import { useAuth } from '../contexts/AuthContext';
 import { LogIn, Mail, Lock } from 'lucide-react';
 import Footer from '../components/Footer';
 
-export default function DoctorLogin() {
+interface DoctorLoginProps {
+  onNavigate: (page: string) => void;
+}
+
+export default function DoctorLogin({ onNavigate }: DoctorLoginProps) {
   const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,7 +25,7 @@ export default function DoctorLogin() {
       setError(signInError.message);
       setLoading(false);
     } else {
-      window.location.href = '/dashboard';
+      onNavigate('dashboard');
     }
   }
 
@@ -99,7 +103,7 @@ export default function DoctorLogin() {
           </div>
         </div>
       </div>
-      <Footer />
+      <Footer onNavigate={onNavigate} />
     </div>
   );
 }

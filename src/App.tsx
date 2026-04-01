@@ -67,7 +67,7 @@ function App() {
 
         {currentPage === 'doctor-registration' && <DoctorRegistration />}
 
-        {currentPage === 'doctor-login' && <DoctorLogin />}
+        {currentPage === 'doctor-login' && <DoctorLogin onNavigate={handleNavigate} />}
 
         {currentPage === 'dashboard' && <DoctorDashboard />}
 
