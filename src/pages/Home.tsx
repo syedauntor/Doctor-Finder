@@ -149,27 +149,27 @@ export default function Home({ onNavigate }: HomeProps) {
         )}
       </div>
 
-      <div className="bg-white py-16">
+      <div className="bg-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
               Find Doctors Near You
             </h2>
-            <p className="text-gray-600 text-lg">Search by location and specialty</p>
+            <p className="text-gray-600">Search by location and specialty</p>
           </div>
 
-          <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
-            <div className="space-y-6">
+          <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl border border-gray-100 p-6">
+            <div className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Choose Location
                 </label>
                 <div className="relative">
-                  <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <select
                     value={selectedDivision}
                     onChange={(e) => setSelectedDivision(e.target.value)}
-                    className="w-full pl-12 pr-10 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent appearance-none bg-white text-gray-700 font-medium cursor-pointer transition-all hover:border-teal-400"
+                    className="w-full pl-11 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent appearance-none bg-white text-gray-700 font-medium cursor-pointer transition-all hover:border-teal-400"
                   >
                     <option value="">Select a Division</option>
                     {divisions.map((division) => (
@@ -179,7 +179,7 @@ export default function Home({ onNavigate }: HomeProps) {
                     ))}
                   </select>
                   <svg
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -190,15 +190,15 @@ export default function Home({ onNavigate }: HomeProps) {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Choose Specialty
                 </label>
                 <div className="relative">
-                  <Stethoscope className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Stethoscope className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <select
                     value={selectedSpecialtyFilter}
                     onChange={(e) => setSelectedSpecialtyFilter(e.target.value)}
-                    className="w-full pl-12 pr-10 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent appearance-none bg-white text-gray-700 font-medium cursor-pointer transition-all hover:border-teal-400"
+                    className="w-full pl-11 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent appearance-none bg-white text-gray-700 font-medium cursor-pointer transition-all hover:border-teal-400"
                   >
                     <option value="">Select a Specialty</option>
                     {specializations.map((spec) => (
@@ -208,7 +208,7 @@ export default function Home({ onNavigate }: HomeProps) {
                     ))}
                   </select>
                   <svg
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -228,7 +228,7 @@ export default function Home({ onNavigate }: HomeProps) {
                     });
                   }
                 }}
-                className="w-full bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex items-center justify-center space-x-2"
+                className="w-full bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex items-center justify-center space-x-2"
               >
                 <Search className="h-5 w-5" />
                 <span>Search Doctors</span>
