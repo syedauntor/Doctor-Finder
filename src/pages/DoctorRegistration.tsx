@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Phone, Mail, CheckCircle } from 'lucide-react';
+import Footer from '../components/Footer';
 
 export default function DoctorRegistration() {
   const [formData, setFormData] = useState({
@@ -295,6 +296,7 @@ export default function DoctorRegistration() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
