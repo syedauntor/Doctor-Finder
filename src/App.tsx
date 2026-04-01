@@ -11,6 +11,8 @@ import DoctorLogin from './pages/DoctorLogin';
 import DoctorDashboard from './pages/DoctorDashboard';
 import BookAppointment from './pages/BookAppointment';
 import AvailabilityManagement from './pages/AvailabilityManagement';
+import AdminLogin from './pages/AdminLogin';
+import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -72,6 +74,10 @@ function App() {
         {currentPage === 'book-appointment' && <BookAppointment doctorId={selectedDoctorId} />}
 
         {currentPage === 'availability' && <AvailabilityManagement />}
+
+        {currentPage === 'admin-login' && <AdminLogin onNavigate={handleNavigate} />}
+
+        {currentPage === 'admin-dashboard' && <AdminDashboard />}
       </div>
     </AuthProvider>
   );

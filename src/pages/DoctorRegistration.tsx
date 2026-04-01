@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Phone, Mail, CheckCircle } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 import Footer from '../components/Footer';
 
 export default function DoctorRegistration() {
@@ -14,22 +15,50 @@ export default function DoctorRegistration() {
   });
 
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        specialty: '',
-        bmdcNumber: '',
-        experience: '',
-        message: '',
-      });
-    }, 3000);
+    setLoading(true);
+    setError('');
+
+    try {
+      const { error: submitError } = await supabase
+        .from('doctor_registration_requests')
+        .insert([
+          {
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            specialty: formData.specialty,
+            bmdc_number: formData.bmdcNumber,
+            experience: formData.experience,
+            message: formData.message,
+            status: 'pending'
+          }
+        ]);
+
+      if (submitError) throw submitError;
+
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          specialty: '',
+          bmdcNumber: '',
+          experience: '',
+          message: '',
+        });
+      }, 5000);
+    } catch (err: any) {
+      setError(err.message || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (
@@ -134,8 +163,14 @@ export default function DoctorRegistration() {
                   <CheckCircle className="h-5 w-5 mr-2" />
                   <span>
                     Thank you! Your registration has been submitted successfully.
-                    We will contact you soon.
+                    We will review your application and contact you soon.
                   </span>
+                </div>
+              )}
+
+              {error && (
+                <div className="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+                  {error}
                 </div>
               )}
 
@@ -287,9 +322,10 @@ export default function DoctorRegistration() {
 
                 <button
                   type="submit"
-                  className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
+                  disabled={loading}
+                  className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Submit Registration
+                  {loading ? 'Submitting...' : 'Submit Registration'}
                 </button>
               </form>
             </div>

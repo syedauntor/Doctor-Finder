@@ -60,19 +60,28 @@ export default function Footer({ onNavigate }: FooterProps) {
             <h3 className="text-white text-lg font-bold mb-4">For Doctors</h3>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-sm hover:text-teal-400 transition-colors">
+                <button
+                  onClick={() => onNavigate?.('doctor-registration')}
+                  className="text-sm hover:text-teal-400 transition-colors text-left"
+                >
                   Join Our Network
-                </a>
+                </button>
               </li>
               <li>
-                <a href="#" className="text-sm hover:text-teal-400 transition-colors">
-                  Update Profile
-                </a>
+                <button
+                  onClick={() => onNavigate?.('doctor-login')}
+                  className="text-sm hover:text-teal-400 transition-colors text-left"
+                >
+                  Doctor Login
+                </button>
               </li>
               <li>
-                <a href="#" className="text-sm hover:text-teal-400 transition-colors">
-                  Resources
-                </a>
+                <button
+                  onClick={() => onNavigate?.('dashboard')}
+                  className="text-sm hover:text-teal-400 transition-colors text-left"
+                >
+                  Doctor Dashboard
+                </button>
               </li>
             </ul>
           </div>
@@ -125,6 +134,12 @@ export default function Footer({ onNavigate }: FooterProps) {
             <a href="#" className="text-sm hover:text-teal-400 transition-colors">
               Cookie Policy
             </a>
+            <button
+              onClick={() => onNavigate?.('admin-login')}
+              className="text-sm hover:text-teal-400 transition-colors text-left"
+            >
+              Admin
+            </button>
           </div>
         </div>
       </div>
