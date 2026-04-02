@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { CheckCircle, XCircle, CreditCard as Edit, Trash2, Save, X, ShieldCheck, Plus, Upload, Image as ImageIcon } from 'lucide-react';
+import AutocompleteInput from '../components/AutocompleteInput';
 
 interface Doctor {
   id: string;
@@ -789,28 +790,28 @@ export default function EnhancedDoctorManagement({ doctorId, onBack, onUpdate }:
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Institution</label>
-                      <input
-                        type="text"
+                      <AutocompleteInput
+                        type="institution"
                         value={exp.institution}
-                        onChange={(e) => {
+                        onChange={(value) => {
                           const newExp = [...currentExperience];
-                          newExp[index].institution = e.target.value;
+                          newExp[index].institution = value;
                           setCurrentExperience(newExp);
                         }}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                        placeholder="Search or add institution"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Position</label>
-                      <input
-                        type="text"
+                      <AutocompleteInput
+                        type="position"
                         value={exp.position}
-                        onChange={(e) => {
+                        onChange={(value) => {
                           const newExp = [...currentExperience];
-                          newExp[index].position = e.target.value;
+                          newExp[index].position = value;
                           setCurrentExperience(newExp);
                         }}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                        placeholder="Search or add position"
                       />
                     </div>
                     <div>
@@ -881,28 +882,28 @@ export default function EnhancedDoctorManagement({ doctorId, onBack, onUpdate }:
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Institution</label>
-                      <input
-                        type="text"
+                      <AutocompleteInput
+                        type="institution"
                         value={exp.institution}
-                        onChange={(e) => {
+                        onChange={(value) => {
                           const newExp = [...previousExperience];
-                          newExp[index].institution = e.target.value;
+                          newExp[index].institution = value;
                           setPreviousExperience(newExp);
                         }}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                        placeholder="Search or add institution"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Position</label>
-                      <input
-                        type="text"
+                      <AutocompleteInput
+                        type="position"
                         value={exp.position}
-                        onChange={(e) => {
+                        onChange={(value) => {
                           const newExp = [...previousExperience];
-                          newExp[index].position = e.target.value;
+                          newExp[index].position = value;
                           setPreviousExperience(newExp);
                         }}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                        placeholder="Search or add position"
                       />
                     </div>
                     <div>
