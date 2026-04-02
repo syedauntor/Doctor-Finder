@@ -161,14 +161,24 @@ export default function DoctorProfileEdit() {
         .select('*')
         .eq('doctor_id', doctorId)
         .order('since_year', { ascending: false });
-      setCurrentExperience(currentExpData || []);
+
+      const transformedCurrentExp = (currentExpData || []).map((exp: any) => ({
+        ...exp,
+        designation: exp.designation || exp.position || '',
+      }));
+      setCurrentExperience(transformedCurrentExp);
 
       const { data: previousExpData } = await supabase
         .from('previous_experience')
         .select('*')
         .eq('doctor_id', doctorId)
         .order('end_year', { ascending: false });
-      setPreviousExperience(previousExpData || []);
+
+      const transformedPrevExp = (previousExpData || []).map((exp: any) => ({
+        ...exp,
+        designation: exp.designation || exp.position || '',
+      }));
+      setPreviousExperience(transformedPrevExp);
 
       const { data: chambersData } = await supabase
         .from('chambers')

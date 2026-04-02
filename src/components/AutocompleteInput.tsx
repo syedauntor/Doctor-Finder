@@ -5,7 +5,7 @@ import { ChevronDown, Plus } from 'lucide-react';
 interface AutocompleteInputProps {
   value: string;
   onChange: (value: string) => void;
-  type: 'institution' | 'position';
+  type: 'institution' | 'position' | 'designation';
   placeholder?: string;
   disabled?: boolean;
 }
@@ -36,7 +36,7 @@ export default function AutocompleteInput({
   }, [type]);
 
   useEffect(() => {
-    setInputValue(value);
+    setInputValue(value || '');
   }, [value]);
 
   useEffect(() => {
@@ -75,7 +75,7 @@ export default function AutocompleteInput({
     if (newValue.trim()) {
       const filtered = suggestions.filter(s => {
         const text = type === 'institution' ? s.name : s.title;
-        return text?.toLowerCase().includes(newValue.toLowerCase());
+        return text?.toLowerCase().includes((newValue || '').toLowerCase());
       });
       setFilteredSuggestions(filtered);
       setShowDropdown(true);
@@ -128,7 +128,7 @@ export default function AutocompleteInput({
 
       const { data, error } = await supabase
         .from(tableName)
-        .insert([{ [fieldName]: inputValue.trim(), usage_count: 1 }])
+        .insert([{ [fieldName]: (inputValue || '').trim(), usage_count: 1 }])
         .select()
         .single();
 
