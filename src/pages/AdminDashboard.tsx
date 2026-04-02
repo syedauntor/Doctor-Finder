@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { CheckCircle, XCircle, Clock, Users, UserCheck, FileText, Eye, LogOut, Home, Calendar } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, Users, UserCheck, FileText, Eye, LogOut, Home, Calendar, Settings } from 'lucide-react';
 import Footer from '../components/Footer';
+import DoctorManagement from './DoctorManagement';
 
 interface RegistrationRequest {
   id: string;
@@ -59,6 +60,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const [selectedItem, setSelectedItem] = useState<RegistrationRequest | Doctor | null>(null);
   const [verificationNotes, setVerificationNotes] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
+  const [managingDoctorId, setManagingDoctorId] = useState<string | null>(null);
 
   useEffect(() => {
     checkAdminStatus();
@@ -248,6 +250,27 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Access Denied</h2>
           <p className="text-gray-600">You do not have admin permissions to access this page.</p>
         </div>
+      </div>
+    );
+  }
+
+  if (managingDoctorId) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="bg-gradient-to-r from-teal-700 to-teal-600 text-white py-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+            <p className="text-teal-100 mt-2">Manage doctor profile</p>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <DoctorManagement
+            doctorId={managingDoctorId}
+            onBack={() => setManagingDoctorId(null)}
+            onUpdate={loadData}
+          />
+        </div>
+        <Footer onNavigate={onNavigate} />
       </div>
     );
   }
@@ -472,10 +495,10 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                             {doctor.is_verified ? 'Verified' : 'Not Verified'}
                           </span>
                           <button
-                            onClick={() => setSelectedItem(doctor)}
+                            onClick={() => setManagingDoctorId(doctor.id)}
                             className="mt-2 text-teal-600 hover:text-teal-700 font-medium text-sm flex items-center"
                           >
-                            <Eye className="h-4 w-4 mr-1" />
+                            <Settings className="h-4 w-4 mr-1" />
                             Manage
                           </button>
                         </div>

@@ -1,4 +1,4 @@
-import { Clock, Phone, CreditCard } from 'lucide-react';
+import { Clock, Phone, CreditCard, ShieldCheck } from 'lucide-react';
 import type { Doctor } from '../lib/supabase';
 
 type DoctorCardProps = {
@@ -22,7 +22,15 @@ export default function DoctorCard({
             className="w-24 h-24 rounded-full object-cover border-2 border-teal-100"
           />
           <div className="flex-1">
-            <h3 className="text-xl font-bold text-gray-800">{doctor.name}</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-xl font-bold text-gray-800">{doctor.name}</h3>
+              {doctor.is_verified && (
+                <div className="flex items-center gap-1 bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                  <ShieldCheck className="h-4 w-4" />
+                  <span className="text-xs font-medium">Verified</span>
+                </div>
+              )}
+            </div>
             <p className="text-sm text-gray-600 mt-1">{doctor.title}</p>
             {specialization && (
               <span className="inline-block mt-2 px-3 py-1 bg-teal-100 text-teal-700 text-xs font-medium rounded-full">

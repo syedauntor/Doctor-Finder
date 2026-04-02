@@ -17,6 +17,7 @@ import {
   Printer,
   QrCode,
   Download,
+  ShieldCheck,
 } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
 import {
@@ -272,9 +273,17 @@ export default function DoctorDetail({
               </div>
 
               <div className="flex-1">
-                <h1 className="text-3xl font-bold text-gray-800">
-                  {doctor.name}
-                </h1>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <h1 className="text-3xl font-bold text-gray-800">
+                    {doctor.name}
+                  </h1>
+                  {doctor.is_verified && (
+                    <div className="flex items-center gap-1 bg-green-100 text-green-800 px-3 py-1.5 rounded-full">
+                      <ShieldCheck className="h-5 w-5" />
+                      <span className="text-sm font-medium">Verified Doctor</span>
+                    </div>
+                  )}
+                </div>
                 <p className="text-lg text-gray-600 mt-2">{doctor.title}</p>
                 {doctor.designation && (
                   <p className="text-md text-teal-600 font-semibold mt-1">
