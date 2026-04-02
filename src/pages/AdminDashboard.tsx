@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { CheckCircle, XCircle, Clock, Users, UserCheck, FileText, Eye, LogOut, Home, Calendar, Settings } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, Users, UserCheck, FileText, Eye, LogOut, Home, Calendar, Settings, Plus, Trash2, Save } from 'lucide-react';
 import Footer from '../components/Footer';
 import EnhancedDoctorManagement from './EnhancedDoctorManagement';
 
@@ -51,11 +51,20 @@ interface Appointment {
   };
 }
 
+interface Specialization {
+  id: string;
+  name: string;
+  slug: string;
+  created_at: string;
+}
+
 export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
-  const [activeTab, setActiveTab] = useState<'requests' | 'doctors' | 'appointments'>('requests');
+  const [activeTab, setActiveTab] = useState<'requests' | 'doctors' | 'appointments' | 'settings'>('requests');
   const [requests, setRequests] = useState<RegistrationRequest[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [specializations, setSpecializations] = useState<Specialization[]>([]);
+  const [newSpecialization, setNewSpecialization] = useState('');
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<RegistrationRequest | Doctor | null>(null);
   const [verificationNotes, setVerificationNotes] = useState('');
@@ -128,6 +137,14 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
 
         if (error) throw error;
         setAppointments(data || []);
+      } else if (activeTab === 'settings') {
+        const { data, error } = await supabase
+          .from('specializations')
+          .select('*')
+          .order('name');
+
+        if (error) throw error;
+        setSpecializations(data || []);
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -228,6 +245,50 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       onNavigate('home');
     } catch (error) {
       console.error('Error logging out:', error);
+    }
+  }
+
+  async function handleAddSpecialization() {
+    if (!newSpecialization.trim()) {
+      alert('Please enter a specialization name');
+      return;
+    }
+
+    try {
+      const slug = newSpecialization.toLowerCase().replace(/\s+/g, '-');
+      const { error } = await supabase
+        .from('specializations')
+        .insert([{ name: newSpecialization.trim(), slug }]);
+
+      if (error) throw error;
+
+      setNewSpecialization('');
+      loadData();
+      alert('Specialization added successfully!');
+    } catch (error) {
+      console.error('Error adding specialization:', error);
+      alert('Failed to add specialization');
+    }
+  }
+
+  async function handleDeleteSpecialization(id: string, name: string) {
+    if (!confirm(`Are you sure you want to delete "${name}"? This will remove it from all doctors.`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('specializations')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      loadData();
+      alert('Specialization deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting specialization:', error);
+      alert('Failed to delete specialization');
     }
   }
 
@@ -388,6 +449,17 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
               >
                 <Calendar className="inline-block h-5 w-5 mr-2" />
                 Appointments
+              </button>
+              <button
+                onClick={() => setActiveTab('settings')}
+                className={`flex-1 px-6 py-4 text-center font-medium transition-colors ${
+                  activeTab === 'settings'
+                    ? 'bg-teal-600 text-white'
+                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <Settings className="inline-block h-5 w-5 mr-2" />
+                Settings
               </button>
             </div>
           </div>
@@ -570,6 +642,60 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                     </div>
                   ))
                 )}
+              </div>
+            )}
+
+            {activeTab === 'settings' && (
+              <div className="space-y-6">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h3 className="font-semibold text-blue-900 mb-2">Available Specializations Management</h3>
+                  <p className="text-sm text-blue-700">
+                    Add or remove specializations that doctors can select for their profiles.
+                  </p>
+                </div>
+
+                <div className="flex gap-3">
+                  <input
+                    type="text"
+                    value={newSpecialization}
+                    onChange={(e) => setNewSpecialization(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleAddSpecialization()}
+                    placeholder="Enter new specialization name"
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  />
+                  <button
+                    onClick={handleAddSpecialization}
+                    className="px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                  >
+                    <Plus className="h-5 w-5" />
+                    Add
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {specializations.length === 0 ? (
+                    <p className="text-center text-gray-500 py-8 col-span-2">No specializations found.</p>
+                  ) : (
+                    specializations.map((spec) => (
+                      <div
+                        key={spec.id}
+                        className="flex items-center justify-between bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                      >
+                        <div>
+                          <h4 className="font-semibold text-gray-900">{spec.name}</h4>
+                          <p className="text-sm text-gray-500">Slug: {spec.slug}</p>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteSpecialization(spec.id, spec.name)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Delete specialization"
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             )}
           </div>

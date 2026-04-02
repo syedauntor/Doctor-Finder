@@ -4,12 +4,14 @@ import type { Doctor } from '../lib/supabase';
 type DoctorCardProps = {
   doctor: Doctor;
   specialization?: string;
+  position?: { position: string; department: string };
   onViewProfile: (doctorId: string) => void;
 };
 
 export default function DoctorCard({
   doctor,
   specialization,
+  position,
   onViewProfile,
 }: DoctorCardProps) {
   return (
@@ -32,6 +34,11 @@ export default function DoctorCard({
               )}
             </div>
             <p className="text-sm text-gray-600 mt-1">{doctor.title}</p>
+            {position && (
+              <p className="text-sm text-gray-700 mt-1 font-medium">
+                {position.position} of {position.department}
+              </p>
+            )}
             {specialization && (
               <span className="inline-block mt-2 px-3 py-1 bg-teal-100 text-teal-700 text-xs font-medium rounded-full">
                 {specialization}

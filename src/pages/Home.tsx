@@ -14,6 +14,9 @@ export default function Home({ onNavigate }: HomeProps) {
   const [doctorSpecializations, setDoctorSpecializations] = useState<
     Map<string, string>
   >(new Map());
+  const [doctorPositions, setDoctorPositions] = useState<
+    Map<string, { position: string; department: string }>
+  >(new Map());
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSpecialization, setSelectedSpecialization] = useState('all');
@@ -27,7 +30,7 @@ export default function Home({ onNavigate }: HomeProps) {
 
   async function loadData() {
     try {
-      const [doctorsRes, specializationsRes, docSpecRes, chambersRes] = await Promise.all([
+      const [doctorsRes, specializationsRes, docSpecRes, chambersRes, currentExpRes] = await Promise.all([
         supabase.from('doctors').select('*').order('rating', { ascending: false }),
         supabase.from('specializations').select('*'),
         supabase
@@ -35,6 +38,7 @@ export default function Home({ onNavigate }: HomeProps) {
           .select('doctor_id, specialization_id, is_primary, specializations(name)')
           .eq('is_primary', true),
         supabase.from('chambers').select('division'),
+        supabase.from('current_experience').select('doctor_id, position, department'),
       ]);
 
       if (doctorsRes.data) setDoctors(doctorsRes.data);
@@ -48,6 +52,19 @@ export default function Home({ onNavigate }: HomeProps) {
           }
         });
         setDoctorSpecializations(map);
+      }
+
+      if (currentExpRes.data) {
+        const posMap = new Map<string, { position: string; department: string }>();
+        currentExpRes.data.forEach((exp: any) => {
+          if (exp.position && exp.department) {
+            posMap.set(exp.doctor_id, {
+              position: exp.position,
+              department: exp.department
+            });
+          }
+        });
+        setDoctorPositions(posMap);
       }
 
       if (chambersRes.data) {
@@ -135,6 +152,7 @@ export default function Home({ onNavigate }: HomeProps) {
               key={doctor.id}
               doctor={doctor}
               specialization={doctorSpecializations.get(doctor.id)}
+              position={doctorPositions.get(doctor.id)}
               onViewProfile={(id) => onNavigate('doctor', id)}
             />
           ))}
