@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { CheckCircle, XCircle, CreditCard as Edit, Trash2, Save, X, ShieldCheck, Plus, Upload, Image as ImageIcon } from 'lucide-react';
+import { CheckCircle, XCircle, CreditCard as Edit, Trash2, Save, X, ShieldCheck, Plus, Upload, Image as ImageIcon, MapPin, ExternalLink } from 'lucide-react';
 import AutocompleteInput from '../components/AutocompleteInput';
+import LocationPicker from '../components/LocationPicker';
 
 interface Doctor {
   id: string;
@@ -50,6 +51,21 @@ interface PreviousExperience {
   end_year: number;
 }
 
+interface Chamber {
+  id?: string;
+  doctor_id: string;
+  name: string;
+  address: string;
+  area: string;
+  city: string;
+  division: string;
+  district: string;
+  upazila: string;
+  latitude?: number;
+  longitude?: number;
+  map_url?: string;
+}
+
 interface DoctorManagementProps {
   doctorId: string;
   onBack: () => void;
@@ -61,13 +77,16 @@ export default function EnhancedDoctorManagement({ doctorId, onBack, onUpdate }:
   const [education, setEducation] = useState<Education[]>([]);
   const [currentExperience, setCurrentExperience] = useState<CurrentExperience[]>([]);
   const [previousExperience, setPreviousExperience] = useState<PreviousExperience[]>([]);
+  const [chambers, setChambers] = useState<Chamber[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [editedDoctor, setEditedDoctor] = useState<Partial<Doctor>>({});
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [activeSection, setActiveSection] = useState<'basic' | 'education' | 'experience'>('basic');
+  const [activeSection, setActiveSection] = useState<'basic' | 'education' | 'experience' | 'chambers'>('basic');
   const [imageUrl, setImageUrl] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [showLocationPicker, setShowLocationPicker] = useState(false);
+  const [selectedChamberIndex, setSelectedChamberIndex] = useState<number | null>(null);
 
   useEffect(() => {
     loadDoctorData();
@@ -106,6 +125,12 @@ export default function EnhancedDoctorManagement({ doctorId, onBack, onUpdate }:
         .eq('doctor_id', doctorId)
         .order('end_year', { ascending: false });
       setPreviousExperience(previousExpData || []);
+
+      const { data: chambersData } = await supabase
+        .from('chambers')
+        .select('*')
+        .eq('doctor_id', doctorId);
+      setChambers(chambersData || []);
     } catch (error) {
       console.error('Error loading doctor data:', error);
       alert('Failed to load doctor details');
@@ -370,6 +395,87 @@ export default function EnhancedDoctorManagement({ doctorId, onBack, onUpdate }:
     setPreviousExperience(previousExperience.filter((_, i) => i !== index));
   }
 
+  async function addChamber() {
+    const newChamber: Chamber = {
+      doctor_id: doctorId,
+      name: '',
+      address: '',
+      area: '',
+      city: '',
+      division: '',
+      district: '',
+      upazila: ''
+    };
+    setChambers([newChamber, ...chambers]);
+  }
+
+  async function saveChamber(chamber: Chamber, index: number) {
+    try {
+      if (chamber.id) {
+        const { error } = await supabase
+          .from('chambers')
+          .update(chamber)
+          .eq('id', chamber.id);
+        if (error) throw error;
+      } else {
+        const { data, error } = await supabase
+          .from('chambers')
+          .insert([chamber])
+          .select()
+          .single();
+        if (error) throw error;
+        const newChambers = [...chambers];
+        newChambers[index] = data;
+        setChambers(newChambers);
+      }
+      alert('Chamber saved successfully!');
+    } catch (error) {
+      console.error('Error saving chamber:', error);
+      alert('Failed to save chamber');
+    }
+  }
+
+  async function deleteChamber(id: string | undefined, index: number) {
+    if (id) {
+      try {
+        const { error } = await supabase
+          .from('chambers')
+          .delete()
+          .eq('id', id);
+        if (error) throw error;
+      } catch (error) {
+        console.error('Error deleting chamber:', error);
+        alert('Failed to delete chamber');
+        return;
+      }
+    }
+    setChambers(chambers.filter((_, i) => i !== index));
+  }
+
+  function handleSetLocation(index: number) {
+    setSelectedChamberIndex(index);
+    setShowLocationPicker(true);
+  }
+
+  async function handleSaveLocation(lat: number, lng: number, mapUrl: string) {
+    if (selectedChamberIndex === null) return;
+
+    const updatedChambers = [...chambers];
+    updatedChambers[selectedChamberIndex] = {
+      ...updatedChambers[selectedChamberIndex],
+      latitude: lat,
+      longitude: lng,
+      map_url: mapUrl
+    };
+    setChambers(updatedChambers);
+    setShowLocationPicker(false);
+    setSelectedChamberIndex(null);
+
+    if (updatedChambers[selectedChamberIndex].id) {
+      await saveChamber(updatedChambers[selectedChamberIndex], selectedChamberIndex);
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -466,6 +572,16 @@ export default function EnhancedDoctorManagement({ doctorId, onBack, onUpdate }:
             }`}
           >
             Experience ({currentExperience.length + previousExperience.length})
+          </button>
+          <button
+            onClick={() => setActiveSection('chambers')}
+            className={`px-4 py-2 font-medium transition-colors ${
+              activeSection === 'chambers'
+                ? 'text-teal-600 border-b-2 border-teal-600'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            Chambers & Location ({chambers.length})
           </button>
         </div>
       </div>
@@ -971,7 +1087,199 @@ export default function EnhancedDoctorManagement({ doctorId, onBack, onUpdate }:
             </div>
           </div>
         )}
+
+        {activeSection === 'chambers' && (
+          <div className="space-y-4">
+            <button
+              onClick={addChamber}
+              className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Add Chamber
+            </button>
+
+            {chambers.map((chamber, index) => (
+              <div key={chamber.id || index} className="border border-gray-300 rounded-lg p-4 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Chamber Name</label>
+                    <input
+                      type="text"
+                      value={chamber.name}
+                      onChange={(e) => {
+                        const newChambers = [...chambers];
+                        newChambers[index].name = e.target.value;
+                        setChambers(newChambers);
+                      }}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      placeholder="e.g., Popular Diagnostic Centre"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+                    <input
+                      type="text"
+                      value={chamber.city}
+                      onChange={(e) => {
+                        const newChambers = [...chambers];
+                        newChambers[index].city = e.target.value;
+                        setChambers(newChambers);
+                      }}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      placeholder="e.g., Dhaka"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                    <input
+                      type="text"
+                      value={chamber.address}
+                      onChange={(e) => {
+                        const newChambers = [...chambers];
+                        newChambers[index].address = e.target.value;
+                        setChambers(newChambers);
+                      }}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      placeholder="Full address"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Area</label>
+                    <input
+                      type="text"
+                      value={chamber.area}
+                      onChange={(e) => {
+                        const newChambers = [...chambers];
+                        newChambers[index].area = e.target.value;
+                        setChambers(newChambers);
+                      }}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      placeholder="e.g., Dhanmondi"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Division</label>
+                    <input
+                      type="text"
+                      value={chamber.division}
+                      onChange={(e) => {
+                        const newChambers = [...chambers];
+                        newChambers[index].division = e.target.value;
+                        setChambers(newChambers);
+                      }}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      placeholder="e.g., Dhaka"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">District</label>
+                    <input
+                      type="text"
+                      value={chamber.district}
+                      onChange={(e) => {
+                        const newChambers = [...chambers];
+                        newChambers[index].district = e.target.value;
+                        setChambers(newChambers);
+                      }}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      placeholder="e.g., Dhaka"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Upazila</label>
+                    <input
+                      type="text"
+                      value={chamber.upazila}
+                      onChange={(e) => {
+                        const newChambers = [...chambers];
+                        newChambers[index].upazila = e.target.value;
+                        setChambers(newChambers);
+                      }}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      placeholder="Optional"
+                    />
+                  </div>
+                </div>
+
+                {chamber.latitude && chamber.longitude && (
+                  <div className="bg-teal-50 border border-teal-200 rounded-lg p-3 flex items-start gap-3">
+                    <MapPin className="h-5 w-5 text-teal-600 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-teal-900">Location Set</p>
+                      <p className="text-xs text-teal-700 mt-1">
+                        Lat: {chamber.latitude.toFixed(6)}, Lng: {chamber.longitude.toFixed(6)}
+                      </p>
+                    </div>
+                    {chamber.map_url && (
+                      <a
+                        href={chamber.map_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-teal-600 hover:text-teal-700 flex items-center gap-1 text-sm"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                        View
+                      </a>
+                    )}
+                  </div>
+                )}
+
+                <div className="flex gap-2 flex-wrap">
+                  <button
+                    onClick={() => saveChamber(chamber, index)}
+                    className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-1"
+                  >
+                    <Save className="h-4 w-4" />
+                    Save Chamber
+                  </button>
+                  <button
+                    onClick={() => handleSetLocation(index)}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-1"
+                  >
+                    <MapPin className="h-4 w-4" />
+                    {chamber.latitude ? 'Edit Location' : 'Set Location'}
+                  </button>
+                  {chamber.map_url && (
+                    <a
+                      href={chamber.map_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-1"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      Get Directions
+                    </a>
+                  )}
+                  <button
+                    onClick={() => deleteChamber(chamber.id, index)}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-1"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            {chambers.length === 0 && (
+              <p className="text-center text-gray-500 py-8">No chambers added yet. Click "Add Chamber" to create one.</p>
+            )}
+          </div>
+        )}
       </div>
+
+      {showLocationPicker && selectedChamberIndex !== null && (
+        <LocationPicker
+          latitude={chambers[selectedChamberIndex]?.latitude}
+          longitude={chambers[selectedChamberIndex]?.longitude}
+          address={chambers[selectedChamberIndex]?.address}
+          onSave={handleSaveLocation}
+          onCancel={() => {
+            setShowLocationPicker(false);
+            setSelectedChamberIndex(null);
+          }}
+        />
+      )}
 
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
