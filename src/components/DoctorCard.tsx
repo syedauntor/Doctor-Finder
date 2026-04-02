@@ -36,7 +36,7 @@ export default function DoctorCard({
             <p className="text-sm text-gray-600 mt-1">{doctor.title}</p>
             {position && (
               <p className="text-sm text-gray-700 mt-1 font-medium">
-                {position.position} of {position.department}
+                {`${position.position} of ${position.department}`}
               </p>
             )}
             {specialization && (
