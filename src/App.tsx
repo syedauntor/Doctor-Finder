@@ -9,6 +9,7 @@ import Category from './pages/Category';
 import DoctorRegistration from './pages/DoctorRegistration';
 import DoctorLogin from './pages/DoctorLogin';
 import DoctorDashboard from './pages/DoctorDashboard';
+import DoctorProfileEdit from './pages/DoctorProfileEdit';
 import BookAppointment from './pages/BookAppointment';
 import AvailabilityManagement from './pages/AvailabilityManagement';
 import AdminLogin from './pages/AdminLogin';
@@ -70,6 +71,8 @@ function App() {
         {currentPage === 'doctor-login' && <DoctorLogin onNavigate={handleNavigate} />}
 
         {currentPage === 'dashboard' && <DoctorDashboard />}
+
+        {currentPage === 'profile-edit' && <DoctorProfileEdit />}
 
         {currentPage === 'book-appointment' && <BookAppointment doctorId={selectedDoctorId} />}
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { Calendar, Clock, User, Phone, Mail, CheckCircle, XCircle, LogOut } from 'lucide-react';
+import { Calendar, Clock, User, Phone, Mail, CheckCircle, XCircle, LogOut, CreditCard as Edit } from 'lucide-react';
 import Footer from '../components/Footer';
 
 interface Appointment {
@@ -111,6 +111,13 @@ export default function DoctorDashboard() {
               <p className="text-gray-600">Manage your appointments and schedule</p>
             </div>
             <div className="flex gap-3">
+              <a
+                href="/?page=profile-edit"
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              >
+                <Edit className="w-4 h-4" />
+                Edit Profile
+              </a>
               <a
                 href="/?page=availability"
                 className="flex items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors"
