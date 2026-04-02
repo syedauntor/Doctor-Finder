@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { CheckCircle, XCircle, CreditCard as Edit, Trash2, Save, X, ShieldCheck, Plus, Upload, Image as ImageIcon, MapPin, ExternalLink } from 'lucide-react';
+import { CheckCircle, XCircle, CreditCard as Edit, Trash2, Save, X, ShieldCheck, Plus, Upload, Image as ImageIcon, MapPin, ExternalLink, Star } from 'lucide-react';
 import AutocompleteInput from '../components/AutocompleteInput';
 import LocationPicker from '../components/LocationPicker';
 
@@ -66,6 +66,20 @@ interface Chamber {
   map_url?: string;
 }
 
+interface Specialization {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+interface DoctorSpecialization {
+  id?: string;
+  doctor_id: string;
+  specialization_id: string;
+  is_primary: boolean;
+  specializations?: Specialization;
+}
+
 interface DoctorManagementProps {
   doctorId: string;
   onBack: () => void;
@@ -78,11 +92,13 @@ export default function EnhancedDoctorManagement({ doctorId, onBack, onUpdate }:
   const [currentExperience, setCurrentExperience] = useState<CurrentExperience[]>([]);
   const [previousExperience, setPreviousExperience] = useState<PreviousExperience[]>([]);
   const [chambers, setChambers] = useState<Chamber[]>([]);
+  const [specializations, setSpecializations] = useState<Specialization[]>([]);
+  const [doctorSpecializations, setDoctorSpecializations] = useState<DoctorSpecialization[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [editedDoctor, setEditedDoctor] = useState<Partial<Doctor>>({});
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [activeSection, setActiveSection] = useState<'basic' | 'education' | 'experience' | 'chambers'>('basic');
+  const [activeSection, setActiveSection] = useState<'basic' | 'specializations' | 'education' | 'experience' | 'chambers'>('basic');
   const [imageUrl, setImageUrl] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
   const [showLocationPicker, setShowLocationPicker] = useState(false);
@@ -90,7 +106,22 @@ export default function EnhancedDoctorManagement({ doctorId, onBack, onUpdate }:
 
   useEffect(() => {
     loadDoctorData();
+    loadSpecializations();
   }, [doctorId]);
+
+  async function loadSpecializations() {
+    try {
+      const { data, error } = await supabase
+        .from('specializations')
+        .select('*')
+        .order('name');
+
+      if (error) throw error;
+      setSpecializations(data || []);
+    } catch (error) {
+      console.error('Error loading specializations:', error);
+    }
+  }
 
   async function loadDoctorData() {
     try {
@@ -131,6 +162,12 @@ export default function EnhancedDoctorManagement({ doctorId, onBack, onUpdate }:
         .select('*')
         .eq('doctor_id', doctorId);
       setChambers(chambersData || []);
+
+      const { data: docSpecData } = await supabase
+        .from('doctor_specializations')
+        .select('*, specializations(*)')
+        .eq('doctor_id', doctorId);
+      setDoctorSpecializations(docSpecData || []);
     } catch (error) {
       console.error('Error loading doctor data:', error);
       alert('Failed to load doctor details');
@@ -476,6 +513,71 @@ export default function EnhancedDoctorManagement({ doctorId, onBack, onUpdate }:
     }
   }
 
+  async function toggleSpecialization(specializationId: string) {
+    const existing = doctorSpecializations.find(ds => ds.specialization_id === specializationId);
+
+    if (existing) {
+      try {
+        const { error } = await supabase
+          .from('doctor_specializations')
+          .delete()
+          .eq('id', existing.id);
+
+        if (error) throw error;
+        setDoctorSpecializations(doctorSpecializations.filter(ds => ds.id !== existing.id));
+        alert('Specialization removed successfully!');
+      } catch (error) {
+        console.error('Error removing specialization:', error);
+        alert('Failed to remove specialization');
+      }
+    } else {
+      try {
+        const { data, error } = await supabase
+          .from('doctor_specializations')
+          .insert([{
+            doctor_id: doctorId,
+            specialization_id: specializationId,
+            is_primary: doctorSpecializations.length === 0
+          }])
+          .select('*, specializations(*)')
+          .single();
+
+        if (error) throw error;
+        setDoctorSpecializations([...doctorSpecializations, data]);
+        alert('Specialization added successfully!');
+      } catch (error) {
+        console.error('Error adding specialization:', error);
+        alert('Failed to add specialization');
+      }
+    }
+  }
+
+  async function setPrimarySpecialization(docSpecId: string) {
+    try {
+      await supabase
+        .from('doctor_specializations')
+        .update({ is_primary: false })
+        .eq('doctor_id', doctorId);
+
+      const { error } = await supabase
+        .from('doctor_specializations')
+        .update({ is_primary: true })
+        .eq('id', docSpecId);
+
+      if (error) throw error;
+
+      const updated = doctorSpecializations.map(ds => ({
+        ...ds,
+        is_primary: ds.id === docSpecId
+      }));
+      setDoctorSpecializations(updated);
+      alert('Primary specialization updated!');
+    } catch (error) {
+      console.error('Error setting primary specialization:', error);
+      alert('Failed to set primary specialization');
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -552,6 +654,16 @@ export default function EnhancedDoctorManagement({ doctorId, onBack, onUpdate }:
             }`}
           >
             Basic Info
+          </button>
+          <button
+            onClick={() => setActiveSection('specializations')}
+            className={`px-4 py-2 font-medium transition-colors ${
+              activeSection === 'specializations'
+                ? 'text-teal-600 border-b-2 border-teal-600'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            Specializations ({doctorSpecializations.length})
           </button>
           <button
             onClick={() => setActiveSection('education')}
@@ -804,6 +916,90 @@ export default function EnhancedDoctorManagement({ doctorId, onBack, onUpdate }:
                 placeholder="Admin notes about verification status"
               />
             </div>
+          </div>
+        )}
+
+        {activeSection === 'specializations' && (
+          <div className="space-y-6">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <h3 className="font-semibold text-blue-900 mb-2">Field of Concentration</h3>
+              <p className="text-sm text-blue-700">
+                Manage doctor specializations. Select all that apply and mark one as primary.
+              </p>
+            </div>
+
+            {doctorSpecializations.length > 0 && (
+              <div className="space-y-3 mb-6">
+                <h4 className="font-semibold text-gray-900">Current Specializations:</h4>
+                {doctorSpecializations.map((docSpec) => (
+                  <div key={docSpec.id} className="flex items-center justify-between bg-teal-50 border border-teal-200 rounded-lg p-4">
+                    <div className="flex items-center gap-3">
+                      {docSpec.is_primary && (
+                        <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
+                      )}
+                      <span className="font-medium text-gray-900">
+                        {docSpec.specializations?.name}
+                      </span>
+                      {docSpec.is_primary && (
+                        <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded">
+                          Primary
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      {!docSpec.is_primary && (
+                        <button
+                          onClick={() => setPrimarySpecialization(docSpec.id!)}
+                          className="px-3 py-1 text-sm bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors"
+                        >
+                          Set as Primary
+                        </button>
+                      )}
+                      <button
+                        onClick={() => toggleSpecialization(docSpec.specialization_id)}
+                        className="px-3 py-1 text-sm bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-3">Available Specializations:</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {specializations.map((spec) => {
+                  const isSelected = doctorSpecializations.some(ds => ds.specialization_id === spec.id);
+                  return (
+                    <button
+                      key={spec.id}
+                      onClick={() => toggleSpecialization(spec.id)}
+                      disabled={isSelected}
+                      className={`p-4 rounded-lg border-2 text-left transition-all ${
+                        isSelected
+                          ? 'border-teal-500 bg-teal-50 cursor-not-allowed opacity-50'
+                          : 'border-gray-200 hover:border-teal-500 hover:bg-teal-50 cursor-pointer'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium text-gray-900">{spec.name}</span>
+                        {isSelected && (
+                          <span className="text-teal-600 font-semibold">Selected</span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {doctorSpecializations.length === 0 && (
+              <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
+                No specializations selected. Click on any specialization above to add it.
+              </div>
+            )}
           </div>
         )}
 
