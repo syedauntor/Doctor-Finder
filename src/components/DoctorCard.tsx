@@ -4,7 +4,7 @@ import type { Doctor } from '../lib/supabase';
 type DoctorCardProps = {
   doctor: Doctor;
   specialization?: string;
-  position?: { position: string; department: string };
+  position?: { designation: string; department: string };
   onViewProfile: (doctorId: string) => void;
 };
 
@@ -36,7 +36,7 @@ export default function DoctorCard({
             <p className="text-sm text-gray-600 mt-1">{doctor.title}</p>
             {position && (
               <p className="text-sm text-gray-700 mt-1 font-medium">
-                {`${position.position} of ${position.department}`}
+                {`${position.designation} of ${position.department}`}
               </p>
             )}
             {specialization && (

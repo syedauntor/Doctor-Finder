@@ -36,8 +36,9 @@ interface CurrentExperience {
   id?: string;
   doctor_id: string;
   institution: string;
-  position: string;
+  designation: string;
   department: string;
+  department_id?: string;
   since_year: number;
 }
 
@@ -45,8 +46,9 @@ interface PreviousExperience {
   id?: string;
   doctor_id: string;
   institution: string;
-  position: string;
+  designation: string;
   department: string;
+  department_id?: string;
   start_year: number;
   end_year: number;
 }
@@ -67,6 +69,12 @@ interface Chamber {
 }
 
 interface Specialization {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+interface Department {
   id: string;
   name: string;
   slug: string;
@@ -93,6 +101,7 @@ export default function EnhancedDoctorManagement({ doctorId, onBack, onUpdate }:
   const [previousExperience, setPreviousExperience] = useState<PreviousExperience[]>([]);
   const [chambers, setChambers] = useState<Chamber[]>([]);
   const [specializations, setSpecializations] = useState<Specialization[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [doctorSpecializations, setDoctorSpecializations] = useState<DoctorSpecialization[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -111,15 +120,18 @@ export default function EnhancedDoctorManagement({ doctorId, onBack, onUpdate }:
 
   async function loadSpecializations() {
     try {
-      const { data, error } = await supabase
-        .from('specializations')
-        .select('*')
-        .order('name');
+      const [specializationsRes, departmentsRes] = await Promise.all([
+        supabase.from('specializations').select('*').order('name'),
+        supabase.from('departments').select('*').order('name'),
+      ]);
 
-      if (error) throw error;
-      setSpecializations(data || []);
+      if (specializationsRes.error) throw specializationsRes.error;
+      if (departmentsRes.error) throw departmentsRes.error;
+
+      setSpecializations(specializationsRes.data || []);
+      setDepartments(departmentsRes.data || []);
     } catch (error) {
-      console.error('Error loading specializations:', error);
+      console.error('Error loading specializations and departments:', error);
     }
   }
 
@@ -1114,30 +1126,38 @@ export default function EnhancedDoctorManagement({ doctorId, onBack, onUpdate }:
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Position</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Designation</label>
                       <AutocompleteInput
-                        type="position"
-                        value={exp.position}
+                        type="designation"
+                        value={exp.designation}
                         onChange={(value) => {
                           const newExp = [...currentExperience];
-                          newExp[index].position = value;
+                          newExp[index].designation = value;
                           setCurrentExperience(newExp);
                         }}
-                        placeholder="Search or add position"
+                        placeholder="Search or add designation"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Department</label>
-                      <input
-                        type="text"
-                        value={exp.department}
+                      <select
+                        value={exp.department_id || ''}
                         onChange={(e) => {
                           const newExp = [...currentExperience];
-                          newExp[index].department = e.target.value;
+                          newExp[index].department_id = e.target.value;
+                          const dept = departments.find(d => d.id === e.target.value);
+                          newExp[index].department = dept?.name || '';
                           setCurrentExperience(newExp);
                         }}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                      />
+                      >
+                        <option value="">Select department</option>
+                        {departments.map((dept) => (
+                          <option key={dept.id} value={dept.id}>
+                            {dept.name}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Since Year</label>
@@ -1206,30 +1226,38 @@ export default function EnhancedDoctorManagement({ doctorId, onBack, onUpdate }:
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Position</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Designation</label>
                       <AutocompleteInput
-                        type="position"
-                        value={exp.position}
+                        type="designation"
+                        value={exp.designation}
                         onChange={(value) => {
                           const newExp = [...previousExperience];
-                          newExp[index].position = value;
+                          newExp[index].designation = value;
                           setPreviousExperience(newExp);
                         }}
-                        placeholder="Search or add position"
+                        placeholder="Search or add designation"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Department</label>
-                      <input
-                        type="text"
-                        value={exp.department}
+                      <select
+                        value={exp.department_id || ''}
                         onChange={(e) => {
                           const newExp = [...previousExperience];
-                          newExp[index].department = e.target.value;
+                          newExp[index].department_id = e.target.value;
+                          const dept = departments.find(d => d.id === e.target.value);
+                          newExp[index].department = dept?.name || '';
                           setPreviousExperience(newExp);
                         }}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                      />
+                      >
+                        <option value="">Select department</option>
+                        {departments.map((dept) => (
+                          <option key={dept.id} value={dept.id}>
+                            {dept.name}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Start Year</label>

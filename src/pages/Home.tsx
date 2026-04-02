@@ -15,7 +15,7 @@ export default function Home({ onNavigate }: HomeProps) {
     Map<string, string>
   >(new Map());
   const [doctorPositions, setDoctorPositions] = useState<
-    Map<string, { position: string; department: string }>
+    Map<string, { designation: string; department: string }>
   >(new Map());
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -38,7 +38,7 @@ export default function Home({ onNavigate }: HomeProps) {
           .select('doctor_id, specialization_id, is_primary, specializations(name)')
           .eq('is_primary', true),
         supabase.from('chambers').select('division'),
-        supabase.from('current_experience').select('doctor_id, position, department'),
+        supabase.from('current_experience').select('doctor_id, designation, department'),
       ]);
 
       if (doctorsRes.data) setDoctors(doctorsRes.data);
@@ -55,11 +55,11 @@ export default function Home({ onNavigate }: HomeProps) {
       }
 
       if (currentExpRes.data) {
-        const posMap = new Map<string, { position: string; department: string }>();
+        const posMap = new Map<string, { designation: string; department: string }>();
         currentExpRes.data.forEach((exp: any) => {
-          if (exp.position && exp.department) {
+          if (exp.designation && exp.department) {
             posMap.set(exp.doctor_id, {
-              position: exp.position,
+              designation: exp.designation,
               department: exp.department
             });
           }

@@ -58,13 +58,22 @@ interface Specialization {
   created_at: string;
 }
 
+interface Department {
+  id: string;
+  name: string;
+  slug: string;
+  created_at: string;
+}
+
 export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const [activeTab, setActiveTab] = useState<'requests' | 'doctors' | 'appointments' | 'settings'>('requests');
   const [requests, setRequests] = useState<RegistrationRequest[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [specializations, setSpecializations] = useState<Specialization[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [newSpecialization, setNewSpecialization] = useState('');
+  const [newDepartment, setNewDepartment] = useState('');
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<RegistrationRequest | Doctor | null>(null);
   const [verificationNotes, setVerificationNotes] = useState('');
@@ -138,13 +147,16 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         if (error) throw error;
         setAppointments(data || []);
       } else if (activeTab === 'settings') {
-        const { data, error } = await supabase
-          .from('specializations')
-          .select('*')
-          .order('name');
+        const [specializationsRes, departmentsRes] = await Promise.all([
+          supabase.from('specializations').select('*').order('name'),
+          supabase.from('departments').select('*').order('name'),
+        ]);
 
-        if (error) throw error;
-        setSpecializations(data || []);
+        if (specializationsRes.error) throw specializationsRes.error;
+        if (departmentsRes.error) throw departmentsRes.error;
+
+        setSpecializations(specializationsRes.data || []);
+        setDepartments(departmentsRes.data || []);
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -289,6 +301,50 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     } catch (error) {
       console.error('Error deleting specialization:', error);
       alert('Failed to delete specialization');
+    }
+  }
+
+  async function handleAddDepartment() {
+    if (!newDepartment.trim()) {
+      alert('Please enter a department name');
+      return;
+    }
+
+    try {
+      const slug = newDepartment.toLowerCase().replace(/\s+/g, '-');
+      const { error } = await supabase
+        .from('departments')
+        .insert([{ name: newDepartment.trim(), slug }]);
+
+      if (error) throw error;
+
+      setNewDepartment('');
+      loadData();
+      alert('Department added successfully!');
+    } catch (error) {
+      console.error('Error adding department:', error);
+      alert('Failed to add department');
+    }
+  }
+
+  async function handleDeleteDepartment(id: string, name: string) {
+    if (!confirm(`Are you sure you want to delete "${name}"? This will remove it from all experiences.`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('departments')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      loadData();
+      alert('Department deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting department:', error);
+      alert('Failed to delete department');
     }
   }
 
@@ -695,6 +751,58 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                       </div>
                     ))
                   )}
+                </div>
+
+                <div className="border-t border-gray-300 pt-6 mt-8">
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h3 className="font-semibold text-green-900 mb-2">Departments Management</h3>
+                    <p className="text-sm text-green-700">
+                      Add or remove departments that can be selected for doctor experience.
+                    </p>
+                  </div>
+
+                  <div className="flex gap-3 mt-4">
+                    <input
+                      type="text"
+                      value={newDepartment}
+                      onChange={(e) => setNewDepartment(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleAddDepartment()}
+                      placeholder="Enter new department name"
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                    />
+                    <button
+                      onClick={handleAddDepartment}
+                      className="px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                    >
+                      <Plus className="h-5 w-5" />
+                      Add
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    {departments.length === 0 ? (
+                      <p className="text-center text-gray-500 py-8 col-span-2">No departments found.</p>
+                    ) : (
+                      departments.map((dept) => (
+                        <div
+                          key={dept.id}
+                          className="flex items-center justify-between bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                        >
+                          <div>
+                            <h4 className="font-semibold text-gray-900">{dept.name}</h4>
+                            <p className="text-sm text-gray-500">Slug: {dept.slug}</p>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteDepartment(dept.id, dept.name)}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Delete department"
+                          >
+                            <Trash2 className="h-5 w-5" />
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
               </div>
             )}
