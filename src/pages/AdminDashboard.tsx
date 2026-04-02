@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { CheckCircle, XCircle, Clock, Users, UserCheck, FileText, Eye, LogOut, Home, Calendar, Settings } from 'lucide-react';
 import Footer from '../components/Footer';
-import DoctorManagement from './DoctorManagement';
+import EnhancedDoctorManagement from './EnhancedDoctorManagement';
 
 interface RegistrationRequest {
   id: string;
@@ -264,7 +264,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
           </div>
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <DoctorManagement
+          <EnhancedDoctorManagement
             doctorId={managingDoctorId}
             onBack={() => setManagingDoctorId(null)}
             onUpdate={loadData}
