@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { api } from "../api";
+import { api, resolveImageUrl } from "../api";
 import { ShieldCheck, MapPin, Clock, Award, BookOpen, Briefcase, Star } from "lucide-react";
 
 export default function DoctorDetail() {
@@ -28,7 +28,7 @@ export default function DoctorDetail() {
       <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
         <div className="bg-gradient-to-r from-teal-600 to-teal-500 px-8 py-10 text-white">
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-            <img src={doc.profile_image || "https://via.placeholder.com/200"} alt={doc.name} className="w-36 h-36 rounded-full border-4 border-white shadow-xl object-cover" />
+            <img src={resolveImageUrl(doc.profile_image) || "https://via.placeholder.com/200"} alt={doc.name} className="w-36 h-36 rounded-full border-4 border-white shadow-xl object-cover" />
             <div className="flex-1 text-center md:text-left">
               <div className="flex flex-wrap items-center gap-3 justify-center md:justify-start">
                 <h1 className="text-3xl md:text-4xl font-bold" data-testid="doctor-detail-name">{doc.name}</h1>

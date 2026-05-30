@@ -26,3 +26,11 @@ export function formatApiError(detail) {
 }
 
 export const BACKEND_BASE = BACKEND_URL;
+
+/** Resolve image URL to absolute (backend uploads are served at /api/uploads/...) */
+export function resolveImageUrl(url) {
+  if (!url) return "";
+  if (/^https?:\/\//i.test(url)) return url;
+  if (url.startsWith("/")) return `${BACKEND_URL}${url}`;
+  return url;
+}

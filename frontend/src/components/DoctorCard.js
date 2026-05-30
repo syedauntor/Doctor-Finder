@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Clock, Phone, CreditCard, ShieldCheck } from "lucide-react";
+import { resolveImageUrl } from "../api";
 
 export default function DoctorCard({ doctor }) {
   const exp = doctor.current_experience;
@@ -8,7 +9,7 @@ export default function DoctorCard({ doctor }) {
       <div className="p-6">
         <div className="flex items-start space-x-4">
           <img
-            src={doctor.profile_image || "https://via.placeholder.com/150"}
+            src={resolveImageUrl(doctor.profile_image) || "https://via.placeholder.com/150"}
             alt={doctor.name}
             className="w-24 h-24 rounded-full object-cover border-2 border-teal-100"
           />

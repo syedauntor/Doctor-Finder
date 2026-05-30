@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { api, formatApiError } from "../api";
 import { Save, Trash2, Plus } from "lucide-react";
+import "leaflet/dist/leaflet.css";
+import ImageUpload from "../components/ImageUpload";
+import LocationPicker from "../components/LocationPicker";
 
 export default function DoctorProfileEdit() {
   const [doc, setDoc] = useState(null);
@@ -63,7 +66,14 @@ export default function DoctorProfileEdit() {
           <Input label="Designation" value={doc.designation} onChange={(v) => setField("designation", v)} testid="profile-designation" />
           <Input label="Years of experience" type="number" value={doc.years_of_experience} onChange={(v) => setField("years_of_experience", Number(v))} testid="profile-yoe" />
           <Input label="Gender" value={doc.gender} onChange={(v) => setField("gender", v)} testid="profile-gender" />
-          <Input label="Profile image URL" value={doc.profile_image} onChange={(v) => setField("profile_image", v)} testid="profile-image" />
+        </div>
+        <div>
+          <span className="text-sm text-gray-600 block mb-1">Profile image</span>
+          <ImageUpload
+            value={doc.profile_image}
+            onChange={(url) => setField("profile_image", url)}
+            testid="profile-image-upload"
+          />
         </div>
         <textarea value={doc.overview || ""} onChange={(e) => setField("overview", e.target.value)} rows="4" placeholder="About yourself" className="w-full px-4 py-3 border rounded-lg" data-testid="profile-overview" />
         <div className="grid md:grid-cols-3 gap-4">
@@ -116,16 +126,7 @@ export default function DoctorProfileEdit() {
         { key: "end_year", label: "To Year", type: "number" },
       ]} />
 
-      <ListSection title="Chambers" items={chambers} reload={loadAll} endpoint="chambers" fields={[
-        { key: "name", label: "Name" },
-        { key: "address", label: "Address" },
-        { key: "area", label: "Area" },
-        { key: "city", label: "City" },
-        { key: "division", label: "Division" },
-        { key: "district", label: "District" },
-        { key: "upazila", label: "Upazila" },
-        { key: "map_url", label: "Map URL" },
-      ]} />
+      <ChambersSection items={chambers} reload={loadAll} />
     </div>
   );
 }
@@ -201,3 +202,94 @@ function ListSection({ title, items, reload, endpoint, fields }) {
     </section>
   );
 }
+
+function ChambersSection({ items, reload }) {
+  const empty = {
+    name: "", address: "", area: "", city: "",
+    division: "", district: "", upazila: "",
+    latitude: null, longitude: null, map_url: "",
+  };
+  const [draft, setDraft] = useState(empty);
+  const [err, setErr] = useState("");
+
+  const set = (k, v) => setDraft({ ...draft, [k]: v });
+
+  const add = async () => {
+    setErr("");
+    try {
+      const payload = { ...draft };
+      // Cast to numbers / strip nulls
+      payload.latitude = payload.latitude != null && payload.latitude !== "" ? Number(payload.latitude) : null;
+      payload.longitude = payload.longitude != null && payload.longitude !== "" ? Number(payload.longitude) : null;
+      if (!payload.name?.trim()) { setErr("Chamber name is required."); return; }
+      await api.post("/doctor/me/chambers", payload);
+      setDraft(empty);
+      await reload();
+    } catch (e) { setErr(formatApiError(e.response?.data?.detail) || e.message); }
+  };
+
+  const del = async (id) => {
+    try { await api.delete(`/doctor/me/chambers/${id}`); await reload(); }
+    catch (e) { alert(formatApiError(e.response?.data?.detail)); }
+  };
+
+  return (
+    <section className="bg-white rounded-2xl border shadow-sm p-6 mb-6" data-testid="section-chambers">
+      <h2 className="text-xl font-bold mb-4">Chambers</h2>
+      {err && <div className="text-red-600 text-sm mb-3" data-testid="chamber-error">{err}</div>}
+
+      <div className="space-y-2 mb-6">
+        {items.map((c) => (
+          <div key={c.id} className="bg-gray-50 px-3 py-3 rounded-lg border flex justify-between items-start gap-3" data-testid={`chamber-${c.id}`}>
+            <div className="text-sm text-gray-700">
+              <div className="font-semibold text-gray-900">{c.name}</div>
+              <div>{[c.address, c.area, c.city].filter(Boolean).join(", ")}</div>
+              <div className="text-xs text-gray-500">{[c.division, c.district, c.upazila].filter(Boolean).join(" → ")}</div>
+              {c.latitude != null && c.longitude != null && (
+                <div className="text-xs text-gray-500 mt-1">📍 {Number(c.latitude).toFixed(5)}, {Number(c.longitude).toFixed(5)}</div>
+              )}
+            </div>
+            <button onClick={() => del(c.id)} className="text-red-600 hover:text-red-700" data-testid={`del-chamber-${c.id}`}>
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
+        ))}
+        {items.length === 0 && <p className="text-sm text-gray-500">No chambers yet.</p>}
+      </div>
+
+      <div className="bg-gray-50 border rounded-xl p-4">
+        <h3 className="font-semibold mb-3 text-gray-900">Add a new chamber</h3>
+        <div className="grid md:grid-cols-2 gap-3">
+          {[
+            ["name", "Chamber name *"], ["address", "Address"], ["area", "Area"], ["city", "City"],
+            ["division", "Division"], ["district", "District"], ["upazila", "Upazila"],
+          ].map(([k, label]) => (
+            <input
+              key={k}
+              value={draft[k] || ""}
+              onChange={(e) => set(k, e.target.value)}
+              placeholder={label}
+              className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-teal-500"
+              data-testid={`new-chamber-${k}`}
+            />
+          ))}
+        </div>
+
+        <div className="mt-4">
+          <span className="text-sm font-medium text-gray-700 block mb-2">Pin chamber location on map</span>
+          <LocationPicker
+            lat={draft.latitude}
+            lng={draft.longitude}
+            onChange={({ lat, lng, map_url }) => setDraft({ ...draft, latitude: lat, longitude: lng, map_url })}
+            testid="new-chamber-map"
+          />
+        </div>
+
+        <button onClick={add} className="mt-4 inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white px-5 py-2 rounded-lg text-sm" data-testid="add-chamber">
+          <Plus className="h-4 w-4" /> Add Chamber
+        </button>
+      </div>
+    </section>
+  );
+}
+
