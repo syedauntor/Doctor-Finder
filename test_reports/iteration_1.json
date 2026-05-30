@@ -1,0 +1,39 @@
+{
+  "summary": "Full backend API test pass for Doctor Finder migration (FastAPI + MongoDB). 23/23 tests passed covering health, public doctor list/detail, specializations/divisions, auth (admin+doctor login, /me, bearer + cookie, brute force, RBAC), registration approve/reject + new-doctor login, admin stats/doctors/verify, slots + appointment booking + conflict + doctor confirm, doctor self-management (profile, education, availability, chamber+schedule), suggestions.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/auth/admin/login (brute force path)", "issue": "auth.check_brute_force compared MongoDB-stored naive datetime with timezone-aware cutoff -> TypeError -> 500 instead of 429 once lockout was reached. FIXED by normalizing last_attempt to UTC tz-aware before comparison in /app/backend/auth.py."},
+      {"endpoint": "auth/get_current_user", "issue": "Cookie is preferred over Authorization header. This means once a login response set an httpOnly cookie on a client, subsequent Bearer requests with a different role's token will still be authenticated under the cookie's role. Works for browser sessions but can confuse SPA flows that switch users without logout. Consider giving Authorization header precedence, or always returning a fresh cookie that matches the token."}
+    ]
+  },
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Review the timezone fix applied in /app/backend/auth.py:check_brute_force.",
+    "Decide auth precedence: cookie-vs-Authorization header (recommend Authorization > cookie to avoid stale-session surprises in SPA).",
+    "Consider returning the doctor's primary specialization name on doctor list more consistently (already implemented, just confirm UI uses primary_specialization)."
+  ],
+  "critical_code_review_comments": [
+    "server.py is ~790 lines and mixes auth, doctors, admin, appointments, suggestions, uploads - acceptable for MVP but should be split into routers (doctors.py, admin.py, appointments.py) before next feature wave.",
+    "approve_request inserts doctor profile then user without a transaction; partial failure could leave orphan doctor record. Wrap in a try/except with cleanup or a Mongo session.",
+    "doctor_register stores password_hash inside the registration request collection until approved; ensure password_hash is never returned by /api/admin/registration-requests (verified: stripped).",
+    "/api/doctors slot/spec queries do many round trips per request (N+1-ish across doctor_specializations, current_experience). Fine for seed size but consider $lookup aggregation later.",
+    "set_auth_cookie uses secure=False which is fine in preview but must be True in production with samesite=none for cross-site SPA usage.",
+    "CORS allow_credentials is False when origins='*'; SPA cookie-based auth therefore won't work cross-origin - frontend must use Authorization header (which it does)."
+  ],
+  "updated_files": [
+    "/app/backend/auth.py (timezone-safe brute-force check)",
+    "/app/backend/tests/backend_test.py (new comprehensive pytest suite)"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "skipped"},
+  "test_credentials": "Admin: admin@demo.com / demo123456 ; Doctor: dr.farhana@example.com / demo123456 (both verified working)",
+  "seed_data_creation": "Seed script runs on startup. Tests create TEST_-prefixed transient data (doctor registration requests, appointments, education, availability, chamber+schedule) and clean up where deletions are supported. New approved doctors from TestRegistration remain in DB (no admin delete endpoint exists).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Run /app/backend/tests/backend_test.py for full backend regression. Pay attention to cookie pollution if you reuse a requests.Session across role switches - the autouse _no_cookies fixture handles this. /api/auth/me checks cookie first, then Bearer. Brute force is per ip:email, 5 fails in 15 min -> 429.",
+  "rca of the issue": "Brute-force 500: PyMongo decodes BSON datetime as naive UTC; check_brute_force compared this to a tz-aware datetime.now(timezone.utc) cutoff, raising TypeError. Mitigation: re-attach timezone.utc to the stored value before comparison. Reproduction: send 6 admin logins with the same wrong password from the same IP/email - 6th call raised 500 (now 429)."
+}

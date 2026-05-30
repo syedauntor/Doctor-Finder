@@ -90,8 +90,13 @@ async def check_brute_force(db: AsyncIOMotorDatabase, identifier: str) -> None:
     """Raise if more than 5 failed attempts in last 15 minutes."""
     cutoff = datetime.now(timezone.utc) - timedelta(minutes=15)
     record = await db.login_attempts.find_one({"identifier": identifier})
-    if record and record.get("count", 0) >= 5 and record.get("last_attempt", cutoff) > cutoff:
-        raise HTTPException(status_code=429, detail="Too many failed attempts. Try again in 15 minutes.")
+    if record and record.get("count", 0) >= 5:
+        last = record.get("last_attempt")
+        # MongoDB may return naive datetimes; treat them as UTC.
+        if last is not None and last.tzinfo is None:
+            last = last.replace(tzinfo=timezone.utc)
+        if last and last > cutoff:
+            raise HTTPException(status_code=429, detail="Too many failed attempts. Try again in 15 minutes.")
 
 
 async def record_failed_attempt(db: AsyncIOMotorDatabase, identifier: str) -> None:
